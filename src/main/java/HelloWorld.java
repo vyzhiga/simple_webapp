@@ -20,39 +20,49 @@ public class HelloWorld extends HttpServlet {
 	DeleteDbFiles.execute("~", "test", true);
   }
 
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
   {
-      // Set response content type
-      response.setContentType("text/html");
+    	  
+	Connection con = null;
+	Statement stmt = null;
+    ResultSet rs = null;
+	
+	response.setContentType("text/html");
+	PrintWriter out = response.getWriter();
 	  
-	  Connection connection = getDBConnection();	  
-	  Statement stmt = null;
-	  
-       try {
-            connection.setAutoCommit(false);
-            stmt = connection.createStatement();
-            stmt.execute("CREATE TABLE PERSON(id int primary key, name varchar(255))");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(1, 'Anju')");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(2, 'Sonia')");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(3, 'Asha')");
+    try {
+		Class.forName(DB_DRIVER);
+		con = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+		
+        con.setAutoCommit(false);
+        stmt = con.createStatement();
+        stmt.execute("CREATE TABLE PERSON(id int primary key, name varchar(255))");
+        stmt.execute("INSERT INTO PERSON(id, name) VALUES(1, 'Anju')");
+        stmt.execute("INSERT INTO PERSON(id, name) VALUES(2, 'Sonia')");
+        stmt.execute("INSERT INTO PERSON(id, name) VALUES(3, 'Asha')");
 
-            ResultSet rs = stmt.executeQuery("select * from PERSON");
+        rs = stmt.executeQuery("select * from PERSON");			
 			
-			PrintWriter out = response.getWriter();
-			out.println("<h1>H2 Database inserted through Statement</h1><br>");
-            while (rs.next()) {
-                //System.out.println("Id "+rs.getInt("id")+" Name "+rs.getString("name"));
-				out.println("Id "+rs.getInt("id")+" Name "+rs.getString("name")+"<br>");
-            }
-            stmt.close();
-            connection.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            connection.close();
+		out.println("<h1>H2 Database inserted through Statement</h1><br>");
+        while (rs.next()) {
+            //System.out.println("Id "+rs.getInt("id")+" Name "+rs.getString("name"));
+			out.println("Id "+rs.getInt("id")+" Name "+rs.getString("name")+"<br>");
         }
+        stmt.close();
+        con.commit();
+    } catch (SQLException e) {
+			out.println("SQLException caught: " + e.getMessage());
+    } catch (Exception e) {
+            out.println(e);
+    } finally {
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ignored) {
+                out.println(ignored);
+            }
+    }
   }
   
   public void destroy()
@@ -60,7 +70,7 @@ public class HelloWorld extends HttpServlet {
       // do nothing.
   }
   
-  private static Connection getDBConnection() {
+/*  private static Connection getDBConnection() {
         Connection dbConnection = null;
         try {
             Class.forName(DB_DRIVER);
@@ -75,5 +85,5 @@ public class HelloWorld extends HttpServlet {
             System.out.println(e.getMessage());
         }
         return dbConnection;
-    }
+    }*/
 }
