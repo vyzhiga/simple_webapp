@@ -3,6 +3,8 @@
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
@@ -12,9 +14,12 @@ import org.h2.tools.DeleteDbFiles;
 public class HelloWorld extends HttpServlet {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:~/test";
+    private static final String DB_CONNECTION = "jdbc:h2:./test;DB_CLOSE_DELAY=10";
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
+
+    //logging init
+    final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
     public void init() throws ServletException {
         // Do required initialization
@@ -32,6 +37,7 @@ public class HelloWorld extends HttpServlet {
         try {
             Class.forName(DB_DRIVER);
             con = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+            logger.debug("DB created");
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
@@ -44,7 +50,6 @@ public class HelloWorld extends HttpServlet {
 
             out.println("<h1>H2 Database inserted through Statement</h1><br>");
             while (rs.next()) {
-                //System.out.println("Id "+rs.getInt("id")+" Name "+rs.getString("name"));
                 out.println("Id " + rs.getInt("id") + " Name " + rs.getString("name") + "<br>");
             }
             stmt.close();
