@@ -47,6 +47,10 @@ public class HelloWorld extends HttpServlet {
             stmt.execute("INSERT INTO users(id, name) VALUES(2, 'Sonia')");
             stmt.execute("INSERT INTO users(id, name) VALUES(3, 'Asha')");
             stmt.execute("CREATE TABLE books(id int primary key not NULL , isbn varchar(13), name varchar(50), taker REFERENCES users(id))");
+            stmt.execute("INSERT INTO books(id, ISBN, name, taker) VALUES(1,'978-3-16-148410-0', 'Евгений Онегин', 1)");
+            stmt.execute("INSERT INTO books(id, ISBN, name) VALUES(1,'5-4-09-148410-0', 'Дубровский')");
+            stmt.execute("INSERT INTO books(id, ISBN, name) VALUES(1,'5-7-22-567348-0', 'Избранное')");
+            stmt.execute("INSERT INTO books(id, ISBN, name, taker) VALUES(1,'5-3-16-148277-0', 'Собрание сочинений', 2)");
 
             ResultSet rs = stmt.executeQuery("select * from PERSON");
 
