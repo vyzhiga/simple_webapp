@@ -42,10 +42,11 @@ public class HelloWorld extends HttpServlet {
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            stmt.execute("CREATE TABLE users(id int primary key, name varchar(255))");
+            stmt.execute("CREATE TABLE users(id int primary key not NULL , name varchar(255))");
             stmt.execute("INSERT INTO users(id, name) VALUES(1, 'Anju')");
             stmt.execute("INSERT INTO users(id, name) VALUES(2, 'Sonia')");
             stmt.execute("INSERT INTO users(id, name) VALUES(3, 'Asha')");
+            stmt.execute("CREATE TABLE books(id int primary key not NULL , isbn varchar(13), name varchar(50), taker REFERENCES users(id))");
 
             ResultSet rs = stmt.executeQuery("select * from PERSON");
 
