@@ -14,16 +14,17 @@ import org.h2.tools.DeleteDbFiles;
 public class HelloWorld extends HttpServlet {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:./test;DB_CLOSE_DELAY=10";
+    private static final String DB_CONNECTION = "jdbc:h2:mem:";
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
 
     //logging init
     final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
-    public void init() throws ServletException {
+    //public void init() throws ServletException {
+    public void init() {
         // Do required initialization
-        DeleteDbFiles.execute("~", "test", true);
+        //DeleteDbFiles.execute("~", "test", true);
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,10 +42,10 @@ public class HelloWorld extends HttpServlet {
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            stmt.execute("CREATE TABLE PERSON(id int primary key, name varchar(255))");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(1, 'Anju')");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(2, 'Sonia')");
-            stmt.execute("INSERT INTO PERSON(id, name) VALUES(3, 'Asha')");
+            stmt.execute("CREATE TABLE users(id int primary key, name varchar(255))");
+            stmt.execute("INSERT INTO users(id, name) VALUES(1, 'Anju')");
+            stmt.execute("INSERT INTO users(id, name) VALUES(2, 'Sonia')");
+            stmt.execute("INSERT INTO users(id, name) VALUES(3, 'Asha')");
 
             ResultSet rs = stmt.executeQuery("select * from PERSON");
 
