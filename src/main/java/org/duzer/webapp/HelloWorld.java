@@ -42,7 +42,7 @@ public class HelloWorld extends HttpServlet {
             response.sendRedirect(request.getContextPath()+"/index.jsp");
         } else if (request.getPathInfo().equals("/getbooks")) {
             request.setAttribute("bookList", getBooks());
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/ListBooks.jsp");
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
         }
     }
