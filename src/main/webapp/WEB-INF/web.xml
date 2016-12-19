@@ -14,7 +14,7 @@
 
 	<servlet-mapping>
 		<servlet-name>HelloWorld</servlet-name>
-		<url-pattern>/org.duzer.webapp.HelloWorld</url-pattern>
+		<url-pattern>/hw/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
