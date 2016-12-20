@@ -9,12 +9,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
+//import java.io.PrintWriter;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
-
-import org.duzer.webapp.LibrarianBook;
 
 // Extend HttpServlet class
 public class HelloWorld extends HttpServlet {
@@ -31,6 +29,7 @@ public class HelloWorld extends HttpServlet {
     public void init() {
         // Do required initialization
         //DeleteDbFiles.execute("~", "test", true);
+        initDb();
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
