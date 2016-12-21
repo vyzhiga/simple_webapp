@@ -13,22 +13,24 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 // Extend HttpServlet class
 public class HelloWorld extends HttpServlet {
 
+    //DB driver vars
     private static final String DB_DRIVER = "org.h2.Driver";
     private static final String DB_CONNECTION = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
 
+    private static final int numBooks = 20;
+
     //logging init
     final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
-    //public void init() throws ServletException {
     public void init() {
         // Do required initialization
-        //DeleteDbFiles.execute("~", "test", true);
         initDb();
     }
 
@@ -47,28 +49,66 @@ public class HelloWorld extends HttpServlet {
     }
 
     private void initDb() {
+        //DB connection vars
         Connection con = null;
         Statement stmt = null;
+        //Vars for the ISBN pseudorandom generation
+        int min = 345;
+        int max = 970;
+        //Main part of the ISBN string
+        String strISBN;
+        //Vars for init books' takers
+        int initBookTaker;
+        String initSQLstBookTaker;
+        //Init SQL string
+        String strSQLstmt;
 
         try {
             con = getConnection();
+            logger.debug("DB created.");
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
+
+            //Create and fill Users table
             stmt.executeUpdate("CREATE TABLE users(id int primary key NOT NULL, name varchar(255) NOT NULL)");
             stmt.executeUpdate("INSERT INTO users(id, name) VALUES(1, 'Иванов')");
             stmt.executeUpdate("INSERT INTO users(id, name) VALUES(2, 'Петров')");
             stmt.executeUpdate("INSERT INTO users(id, name) VALUES(3, 'Сидоров')");
 
-            stmt.executeUpdate("CREATE TABLE books(id int primary key not NULL , isbn varchar(17) NOT NULL, name varchar(50) NOT NULL , takerid int REFERENCES users(id))");
-            stmt.executeUpdate("INSERT INTO books(id, ISBN, name, takerid) VALUES(1,'978-3-16-148410-0', 'Евгений Онегин', 1)");
-            stmt.executeUpdate("INSERT INTO books(id, ISBN, name) VALUES(2,'5-4-09-148410-0', 'Дубровский')");
-            stmt.executeUpdate("INSERT INTO books(id, ISBN, name) VALUES(3,'5-7-22-567348-0', 'Избранное')");
-            stmt.executeUpdate("INSERT INTO books(id, ISBN, name, takerid) VALUES(4,'5-3-16-148277-0', 'Собрание сочинений', 2)");
+            //Create and fill Book table
+            stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key , isbn varchar(17) NOT NULL, name varchar(50) NOT NULL , takerid int REFERENCES users(id))");
+            //Filling of the Book table
+            for (int i=0; i<numBooks; i++) {
+                //init vars at the beginning of every iteration
+                // Starting ISBN string
+                strISBN = "-3-16-148410-0";
+                // Starting SQL statement
+                strSQLstmt = "INSERT INTO books(ISBN, name";
+                //Defining the random part of the ISBN
+                int partISBN = ThreadLocalRandom.current().nextInt(min, max + 1);
+                //Concat
+                strISBN = Integer.toString(partISBN) + strISBN;
+
+                //Defining temporarily owner of a book
+                initBookTaker = ThreadLocalRandom.current().nextInt(0, 4);
+                //a book is available
+                if (initBookTaker == 0) {
+                    initSQLstBookTaker = "";
+                    strSQLstmt = strSQLstmt + ") VALUES('" + strISBN + "', 'Евгений Онегин')";
+                //smb took a book
+                } else {
+                    initSQLstBookTaker = Integer.toString(initBookTaker);
+                    strSQLstmt = strSQLstmt + ", takerid) VALUES('" + strISBN + "', 'Евгений Онегин', " + initSQLstBookTaker + ")";
+                }
+
+                stmt.executeUpdate(strSQLstmt);
+                logger.debug(strSQLstmt);
+            }
 
             stmt.close();
             con.commit();
-            logger.debug("DB created");
+            logger.debug("Records were inserted.");
         } catch (Exception e) {
             logger.error("init db error", e);
         } finally {
@@ -128,20 +168,4 @@ public class HelloWorld extends HttpServlet {
         }
     }
 
-/*  private static Connection getDBConnection() {
-        Connection dbConnection = null;
-        try {
-            Class.forName(DB_DRIVER);
-        } catch (ClassNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
-        try {
-            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER,
-                    DB_PASSWORD);
-            return dbConnection;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return dbConnection;
-    }*/
 }
