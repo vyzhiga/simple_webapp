@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page isELIgnored="false" %>
 <html>
 <head>
     <title>Title</title>
@@ -15,7 +16,7 @@
     <script type="text/javascript" language="javascript">
         $(document).ready(function () {
             $("#driver").click(function (event) {
-                $('#ins_place').insertAfter('thead').load('http://localhost:8080/simple_webapp_mvn/hw/getbooks');
+                $('#ins_place').insertAfter('thead').load('${pageContext.request.contextPath}/hw/getbooks');
             });
         });
     </script>
