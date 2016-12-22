@@ -14,7 +14,7 @@
 </head>
 <body>
     <table>
-        <tbody>
+        <tbody id="ins_place">
         <!--<tr><th>ID</th><th>NameBook</th><th>ISBNBook</th><th>Book Taker</th></tr>-->
         <c:forEach items="${requestScope.bookList}" var="book">
         <tr>

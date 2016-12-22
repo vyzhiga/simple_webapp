@@ -9,11 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-//import java.io.PrintWriter;
 import java.sql.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+
+//import java.io.PrintWriter;
 
 // Extend HttpServlet class
 public class HelloWorld extends HttpServlet {
@@ -24,7 +25,11 @@ public class HelloWorld extends HttpServlet {
     private static final String DB_USER = "";
     private static final String DB_PASSWORD = "";
 
+    //Total number of books
     private static final int numBooks = 20;
+
+    //Total number of records after query executing
+    private static int numRecords;
 
     //logging init
     final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
@@ -42,7 +47,12 @@ public class HelloWorld extends HttpServlet {
             initDb();
             response.sendRedirect(request.getContextPath()+"/index.jsp");
         } else if (request.getPathInfo().equals("/getbooks")) {
-            request.setAttribute("bookList", getBooks());
+            int page = 1;
+            int recPerPage = 5;
+            if (request.getParameter("page")!=null) {
+                page = Integer.parseInt(request.getParameter("page"));
+            }
+            request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
         }
@@ -65,7 +75,7 @@ public class HelloWorld extends HttpServlet {
 
         try {
             con = getConnection();
-            logger.debug("DB created.");
+            logger.debug("!!! DB created. Start of filling");
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
@@ -77,7 +87,8 @@ public class HelloWorld extends HttpServlet {
             stmt.executeUpdate("INSERT INTO users(id, name) VALUES(3, 'Сидоров')");
 
             //Create and fill Book table
-            stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key , isbn varchar(17) NOT NULL, name varchar(50) NOT NULL , takerid int REFERENCES users(id))");
+            stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key , isbn varchar(17) NOT " +
+                    "NULL, name varchar(50) NOT NULL , takerid int REFERENCES users(id))");
             //Filling of the Book table
             for (int i=0; i<numBooks; i++) {
                 //init vars at the beginning of every iteration
@@ -102,13 +113,20 @@ public class HelloWorld extends HttpServlet {
                     strSQLstmt = strSQLstmt + ", takerid) VALUES('" + strISBN + "', 'Евгений Онегин', " + initSQLstBookTaker + ")";
                 }
 
+                //Learn how many records returns query
+                ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, " +
+                        "U.name AS UserName FROM books B JOIN users U ON U.id = B.takerid ORDER BY BookISBN");
+                if (rs.next()) {
+                    numRecords = rs.getInt(1);
+                }
+
                 stmt.executeUpdate(strSQLstmt);
                 logger.debug(strSQLstmt);
             }
 
             stmt.close();
             con.commit();
-            logger.debug("Records were inserted.");
+            logger.debug("!!! Records were inserted. End of filling");
         } catch (Exception e) {
             logger.error("init db error", e);
         } finally {
@@ -117,7 +135,7 @@ public class HelloWorld extends HttpServlet {
         }
     }
 
-    private List<LibrarianBook> getBooks() {
+    private List<LibrarianBook> getBooks(int offset, int recPerPage) {
         Connection con = null;
         Statement stmt = null;
 
@@ -127,7 +145,9 @@ public class HelloWorld extends HttpServlet {
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name AS UserName FROM books B JOIN users U ON U.id = B.takerid");
+            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
+                    "AS UserName FROM books B JOIN users U ON U.id = B.takerid ORDER BY BookISBN LIMIT " +
+                    Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset));
 
             while (rs.next()) {
                 LibrarianBook book = new LibrarianBook();

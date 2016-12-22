@@ -14,9 +14,11 @@
             src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 
     <script type="text/javascript" language="javascript">
+        var numPage;
+        numPage = 2;
         $(document).ready(function () {
             $("#driver").click(function (event) {
-                $('#ins_place').insertAfter('thead').load('${pageContext.request.contextPath}/hw/getbooks');
+                $('#ins_place').insertAfter('tbody').load('${pageContext.request.contextPath}/hw/getbooks?page='+numPage);
             });
         });
     </script>
