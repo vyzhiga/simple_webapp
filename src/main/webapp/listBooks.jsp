@@ -13,18 +13,20 @@
     <title>Title</title>
 </head>
 <body>
-    <table>
-        <tbody id="ins_place">
-        <!--<tr><th>ID</th><th>NameBook</th><th>ISBNBook</th><th>Book Taker</th></tr>-->
-        <c:forEach items="${requestScope.bookList}" var="book">
-        <tr>
-            <td><c:out value="${book.idBook}"></c:out></td>
-            <td><c:out value="${book.nameBook}"></c:out></td>
-            <td><c:out value="${book.ISBNBook}"></c:out></td>
-            <td><c:out value="${book.bookTaker}"></c:out></td>
-        </tr>
-        </c:forEach>
-        </tbody>
-    </table>
+    <div id="ins_div">
+        <table>
+            <tbody>
+            <!--<tr><th>ID</th><th>NameBook</th><th>ISBNBook</th><th>Book Taker</th></tr>-->
+            <c:forEach items="${requestScope.bookList}" var="book">
+            <tr>
+                <td><c:out value="${book.idBook}"></c:out></td>
+                <td><c:out value="${book.nameBook}"></c:out></td>
+                <td><c:out value="${book.ISBNBook}"></c:out></td>
+                <td><c:out value="${book.bookTaker}"></c:out></td>
+            </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

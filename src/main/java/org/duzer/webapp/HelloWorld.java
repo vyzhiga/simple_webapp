@@ -52,6 +52,9 @@ public class HelloWorld extends HttpServlet {
             if (request.getParameter("page")!=null) {
                 page = Integer.parseInt(request.getParameter("page"));
             }
+            if (request.getParameter("recPerPage") != null) {
+                recPerPage = Integer.parseInt(request.getParameter("recPerPage"));
+            }
             request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
