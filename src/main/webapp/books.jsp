@@ -15,9 +15,11 @@
 
     <script type="text/javascript" language="javascript">
         var numPage = 1;
+        var recPerPage = 5;
+        //		recPerPage = document.getElementById("recqnt").value;
         $(document).ready(function () {
             $("#load").click(function () {
-                $("#tabrow_div").load('${pageContext.request.contextPath}/hw/getbooks?page='+numPage);
+                $("#tabrow_div").load('${pageContext.request.contextPath}/hw/getbooks?page='+numPage+'&recPerPage='+recPerPage);
                 numPage = numPage+1;
             });
         });
@@ -26,22 +28,22 @@
 </head>
 <body>
 
+<table>
+    <tr><td><a href="books.jsp">Книги</a></td><td><a href="users.jsp">Пользователи</a></td></tr>
+</table>
+<br>
+<button type="button" id="load">Load Books</button>
+<input id="recqnt" type="number" min="1" value="5">
+<br>
+<div id="tabhead_div">
     <table>
-        <tr><td><a href="books.jsp">Книги</a></td><td><a href="users.jsp">Пользователи</a></td></tr>
+        <thead>
+        <tr><th>ID</th><th>NameBook</th><th>ISBNBook</th><th>Book Taker</th></tr>
+        </thead>
     </table>
-    <br>
-    <button type="button" id="load">Load Books</button>
-    <input type="number" name="quantity">
-    <br>
-    <div id="tabhead_div">
-        <table>
-            <thead>
-            <tr><th>ID</th><th>NameBook</th><th>ISBNBook</th><th>Book Taker</th></tr>
-            </thead>
-        </table>
-    </div>
-    <div id="tabrow_div">
-    </div>
+</div>
+<div id="tabrow_div">
+</div>
 
 </body>
 </html>
