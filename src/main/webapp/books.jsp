@@ -12,6 +12,25 @@
     <title>Title</title>
     <script type="text/javascript"
             src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <style type="text/css">
+        .booksTbl {
+            border: 4px double black; /* Рамка вокруг таблицы */
+            border-collapse: collapse; /* Отображать только одинарные линии */
+        }
+
+        .booksTbl th {
+            text-align: left; /* Выравнивание по левому краю */
+            background: #ccc; /* Цвет фона ячеек */
+            padding: 5px; /* Поля вокруг содержимого ячеек */
+            border: 1px solid black; /* Граница вокруг ячеек */
+        }
+
+        .booksTbl td {
+            padding: 5px; /* Поля вокруг содержимого ячеек */
+            border: 1px solid black; /* Граница вокруг ячеек */
+        }
+    </style>
 </head>
 
 <body>
@@ -21,11 +40,13 @@
         <td><a href="users.jsp">Пользователи</a></td>
     </tr>
 </table>
-<br>
-<input id="load" type="button" value="Load Books">
-<input id="recqnt" type="number" min="1" defaultValue="5" value="5">
-<br>
-<table>
+
+<div style="margin: 5px 0">
+    <input id="load" type="button" value="Load Books"/>
+    <input id="recqnt" type="number" min="1" defaultValue="5" value="5"/>
+</div>
+
+<table class="booksTbl">
     <thead>
     <tr>
         <th>ID</th>
@@ -34,7 +55,7 @@
         <th>Book Taker</th>
     </tr>
     </thead>
-    <tbody></tbody>
+    <tbody style="display: none;"></tbody>
 </table>
 
 <script type="text/javascript" language="javascript">
