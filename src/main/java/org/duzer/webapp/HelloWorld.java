@@ -58,6 +58,17 @@ public class HelloWorld extends HttpServlet {
             request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
+        } else if (request.getPathInfo().equals("/delbook")) {
+            int idDelBook;
+            if (request.getParameter("idDelBook") !=null) {
+                idDelBook = Integer.parseInt(request.getParameter("idDelBook"));
+                delBooks(idDelBook);
+                response.sendRedirect(request.getContextPath()+"/index.jsp");
+            } else {
+                logger.error("!!! Exec /delbook without a parameter!");
+                response.sendRedirect(request.getContextPath()+"/index.jsp");
+            }
+
         }
     }
 
@@ -78,7 +89,7 @@ public class HelloWorld extends HttpServlet {
 
         try {
             con = getConnection();
-            logger.debug("!!! DB created. Start of filling");
+            logger.debug("!!! DB created. Start of filling.");
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
@@ -171,6 +182,28 @@ public class HelloWorld extends HttpServlet {
         }
         return books;
     }
+
+    private void delBooks(int idDelBook) {
+        Connection con = null;
+        Statement stmt = null;
+
+        try {
+            con = getConnection();
+
+            con.setAutoCommit(false);
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("DELETE FROM books WHERE id= " + Integer.toString(idDelBook));
+
+            stmt.close();
+            con.commit();
+        } catch (Exception e) {
+            logger.error("Del books error", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+    }
+
 
     private Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName(DB_DRIVER);

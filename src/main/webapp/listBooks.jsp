@@ -23,6 +23,11 @@
         <td><c:out value="${book.nameBook}"></c:out></td>
         <td><c:out value="${book.ISBNBook}"></c:out></td>
         <td><c:out value="${book.bookTaker}"></c:out></td>
+        <td>
+            <button id="delBtn">${pageContext.request.contextPath}/hw/getbooks/<c:out value="${book.idBook}"></c:out></button>
+            <form action="${pageContext.request.contextPath}/hw/delbook?idDelBook=" + <c:out value="${book.idBook}"></c:out>
+            </form>
+        </td>
     </tr>
 </c:forEach>
 <!--</tbody>

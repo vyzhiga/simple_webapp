@@ -52,7 +52,8 @@
         <th>ID</th>
         <th>NameBook</th>
         <th>ISBNBook</th>
-        <th>Book Taker</th>
+        <th>Кем взята</th>
+        <th>Удалить</th>
     </tr>
     </thead>
     <tbody style="display: none;"></tbody>
@@ -76,6 +77,9 @@
             $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
             numPage = numPage + 1;
         });
+        $("#delBtn").click(function () {
+            $()
+        })
     });
 </script>
 
