@@ -63,10 +63,8 @@ public class HelloWorld extends HttpServlet {
             if (request.getParameter("idDelBook") !=null) {
                 idDelBook = Integer.parseInt(request.getParameter("idDelBook"));
                 delBooks(idDelBook);
-                response.sendRedirect(request.getContextPath()+"/index.jsp");
             } else {
                 logger.error("!!! Exec /delbook without a parameter!");
-                response.sendRedirect(request.getContextPath()+"/index.jsp");
             }
 
         }
@@ -89,7 +87,7 @@ public class HelloWorld extends HttpServlet {
 
         try {
             con = getConnection();
-            logger.debug("!!! DB created. Start of filling.");
+            logger.debug("DB created. Start of filling.");
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
@@ -140,9 +138,9 @@ public class HelloWorld extends HttpServlet {
 
             stmt.close();
             con.commit();
-            logger.debug("!!! Records were inserted. End of filling");
+            logger.debug("Records were inserted. End of filling");
         } catch (Exception e) {
-            logger.error("init db error", e);
+            logger.error("!!! Init db error", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
@@ -175,7 +173,7 @@ public class HelloWorld extends HttpServlet {
             stmt.close();
             con.commit();
         } catch (Exception e) {
-            logger.error("get books error", e);
+            logger.error("!!! Get books error", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
@@ -189,21 +187,20 @@ public class HelloWorld extends HttpServlet {
 
         try {
             con = getConnection();
-
             con.setAutoCommit(false);
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("DELETE FROM books WHERE id= " + Integer.toString(idDelBook));
 
+            stmt = con.createStatement();
+            stmt.executeUpdate("DELETE FROM books WHERE id= " + Integer.toString(idDelBook));
+            logger.debug("Deleted record with id=" + Integer.toString(idDelBook));
             stmt.close();
             con.commit();
         } catch (Exception e) {
-            logger.error("Del books error", e);
+            logger.error("!!! Del books error", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
         }
     }
-
 
     private Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName(DB_DRIVER);

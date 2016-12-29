@@ -77,9 +77,6 @@
             $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
             numPage = numPage + 1;
         });
-        $("#delBtn").click(function () {
-            $()
-        })
     });
 </script>
 
