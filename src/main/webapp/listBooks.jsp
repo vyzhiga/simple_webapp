@@ -19,15 +19,3 @@
         <td><input type="button" value="Удалить" onclick="jsDeleteBook(<c:out value="${book.idBook}"></c:out>)"></td>
     </tr>
 </c:forEach>
-<script>
-    var getBooksUrl = "${pageContext.request.contextPath}/books.jsp";
-
-    //удаляем книгу
-    function jsDeleteBook(bookid) {
-        var r = confirm("Удалить книгу с id="+bookid +"?");
-        if (r == true) {
-            $.get("${pageContext.request.contextPath}/hw/delbook?idDelBook="+bookid);
-            //location.reload();
-        }
-    }
-</script>

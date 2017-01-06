@@ -60,8 +60,8 @@
 </table>
 
 <script type="text/javascript" language="javascript">
-    var getBooksUrl = "${pageContext.request.contextPath}/hw/getbooks"
 
+    var getBooksUrl = "${pageContext.request.contextPath}/hw/getbooks"
     var numPage = 1;
     var recPerPage = 5;
     $(document).ready(function () {
@@ -78,6 +78,18 @@
             numPage = numPage + 1;
         });
     });
+
+    //удаляем книгу
+    function jsDeleteBook(bookid) {
+        var r = confirm("Удалить книгу с id="+bookid +"?");
+        if (r == true) {
+            $.get("${pageContext.request.contextPath}/hw/delbook?idDelBook="+bookid)
+                .done(function() {
+                    location.reload();
+                })
+        }
+    }
+
 </script>
 
 </body>
