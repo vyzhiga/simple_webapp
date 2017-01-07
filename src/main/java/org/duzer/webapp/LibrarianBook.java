@@ -2,6 +2,7 @@ package org.duzer.webapp;
 
 /**
  * Created by duzer on 18.12.2016.
+ * Класс библиотечной книги.
  */
 public class LibrarianBook {
 

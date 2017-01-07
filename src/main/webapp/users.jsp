@@ -9,6 +9,8 @@
 <html>
 <head>
     <title>Title</title>
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
 <body>
 
@@ -16,6 +18,28 @@
         <tr><td><a href="books.jsp">Книги</a></td><td><a href="users.jsp">Пользователи</a></td></tr>
     </table>
 
-    Dummy page
+    <button type="button">Добавить пользователя</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Пользователь</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script type="text/javascript" language="javascript">
+
+        var getUsersUrl = "${pageContext.request.contextPath}/hw/getusers"
+
+        $(document).ready(function () {
+            $("<tbody></tbody>").insertAfter("tbody:last").load(getUsersUrl);
+        });
+
+    </script>
+
 </body>
 </html>

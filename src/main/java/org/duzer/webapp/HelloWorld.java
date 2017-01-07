@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-//import java.io.PrintWriter;
-
 // Extend HttpServlet class
 public class HelloWorld extends HttpServlet {
 
@@ -67,6 +65,11 @@ public class HelloWorld extends HttpServlet {
                 logger.error("!!! Exec /delbook without a parameter!");
             }
 
+        } else if (request.getPathInfo().equals("/getusers")) {
+            //вызываем jsp с шаблонами для списка пользователей
+            request.setAttribute("userList",getUsers());
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/listUsers.jsp");
+            rd.forward(request, response);
         }
     }
 
@@ -93,10 +96,11 @@ public class HelloWorld extends HttpServlet {
             stmt = con.createStatement();
 
             //Create and fill Users table
-            stmt.executeUpdate("CREATE TABLE users(id int primary key NOT NULL, name varchar(255) NOT NULL)");
-            stmt.executeUpdate("INSERT INTO users(id, name) VALUES(1, 'Иванов')");
-            stmt.executeUpdate("INSERT INTO users(id, name) VALUES(2, 'Петров')");
-            stmt.executeUpdate("INSERT INTO users(id, name) VALUES(3, 'Сидоров')");
+            stmt.executeUpdate("CREATE TABLE users(id INT NOT NULL AUTO_INCREMENT primary key, name varchar(255) NOT NULL UNIQUE, password varchar(255))");
+            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Иванов','xxx')");
+            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Петров','xxx')");
+            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Сидоров','xxx')");
+            logger.debug("Finished initial filling of users");
 
             //Create and fill Book table
             stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key , isbn varchar(17) NOT " +
@@ -145,6 +149,45 @@ public class HelloWorld extends HttpServlet {
             closeQuiet(stmt);
             closeQuiet(con);
         }
+    }
+
+    private List<librarianUser> getUsers() {
+        /**
+         * читаем скриптом список всех пользователей из таблицы users, сортируем,
+         * добавляем в список и возвращаем список всех пользователей
+         */
+
+        Connection con = null;
+        Statement stmt = null;
+
+        List<librarianUser> users = new ArrayList<>();
+
+        try {
+            con = getConnection();
+
+            con.setAutoCommit(false);
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT id AS UserID, name AS UserName, password AS UserPassword FROM users ORDER by UserName");
+
+            while (rs.next()) {
+                librarianUser user = new librarianUser();
+                user.setUserId(rs.getInt("UserID"));
+                user.setUserName(rs.getString("UserName"));
+                user.setUserPass(rs.getString("UserPassword"));
+                users.add(user);
+            }
+
+            stmt.close();
+            con.commit();
+
+        } catch (Exception e) {
+            logger.error("!!! Get users error", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+
+        return users;
     }
 
     private List<LibrarianBook> getBooks(int offset, int recPerPage) {
