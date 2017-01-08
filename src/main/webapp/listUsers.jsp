@@ -12,9 +12,8 @@
 <c:forEach items="${requestScope.userList}" var="user">
     <tr>
         <td><c:out value="${user.userId}"></c:out></td>
-        <td><c:out value="${user.userName}"></c:out></td>
+        <td><a href="#"><c:out value="${user.userName}"></c:out></a></td>
         <!-- кнопка удаления -->
-        <td><input type="button" value="Удалить"></td>
-        <%-- <td><input type="button" value="Удалить" onclick="jsDeleteBook(<c:out value="${book.idBook}"></c:out>)"></td> --%>
+        <td><input type="button" value="Удалить" onclick="jsDeleteUser(<c:out value="${user.userId}"></c:out>)"></td>
     </tr>
 </c:forEach>

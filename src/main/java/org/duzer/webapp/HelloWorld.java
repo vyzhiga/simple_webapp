@@ -42,9 +42,12 @@ public class HelloWorld extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         if (request.getPathInfo().equals("/initdb")) {
+            //инициализация БД
             initDb();
             response.sendRedirect(request.getContextPath()+"/index.jsp");
+
         } else if (request.getPathInfo().equals("/getbooks")) {
+            //выводим список книг постранично
             int page = 1;
             int recPerPage = 5;
             if (request.getParameter("page")!=null) {
@@ -56,7 +59,9 @@ public class HelloWorld extends HttpServlet {
             request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
+
         } else if (request.getPathInfo().equals("/delbook")) {
+            //удаляем книгу
             int idDelBook;
             if (request.getParameter("idDelBook") !=null) {
                 idDelBook = Integer.parseInt(request.getParameter("idDelBook"));
@@ -70,6 +75,16 @@ public class HelloWorld extends HttpServlet {
             request.setAttribute("userList",getUsers());
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listUsers.jsp");
             rd.forward(request, response);
+
+        } else if (request.getPathInfo().equals("/deluser")) {
+            //удаляем пользователя
+            int idDelUser;
+            if (request.getParameter("idDelUser") !=null) {
+                idDelUser = Integer.parseInt(request.getParameter("idDelUser"));
+                delUsers(idDelUser);
+            } else {
+                logger.error("!!! Exec /deluser without a parameter!");
+            }
         }
     }
 
@@ -103,8 +118,8 @@ public class HelloWorld extends HttpServlet {
             logger.debug("Finished initial filling of users");
 
             //Create and fill Book table
-            stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key , isbn varchar(17) NOT " +
-                    "NULL, name varchar(50) NOT NULL , takerid int REFERENCES users(id))");
+            stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key, isbn varchar(17) " +
+                    "NOT NULL, name varchar(50) NOT NULL, takerid int REFERENCES users(id) ON DELETE SET NULL)");
             //Filling of the Book table
             for (int i=0; i<numBooks; i++) {
                 //init vars at the beginning of every iteration
@@ -200,8 +215,12 @@ public class HelloWorld extends HttpServlet {
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
+            /* ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
                     "AS UserName FROM books B JOIN users U ON U.id = B.takerid ORDER BY BookISBN LIMIT " +
+                    Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset)); */
+
+            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
+                    "AS UserName FROM books AS B LEFT JOIN users AS U ON B.takerid = U.id ORDER BY BookISBN LIMIT " +
                     Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset));
 
             while (rs.next()) {
@@ -224,6 +243,30 @@ public class HelloWorld extends HttpServlet {
         return books;
     }
 
+    private void delUsers(int idDelUser) {
+        /**
+         * удаляем пользователя с id=idDelUser
+         */
+        Connection con = null;
+        Statement stmt = null;
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            stmt = con.createStatement();
+            stmt.executeUpdate("DELETE FROM users WHERE id= " + Integer.toString(idDelUser));
+            logger.debug("Deleted user record with id=" + Integer.toString(idDelUser));
+            stmt.close();
+            con.commit();
+        } catch (Exception e) {
+            logger.error("!!! Del users error", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+    }
+
     private void delBooks(int idDelBook) {
         Connection con = null;
         Statement stmt = null;
@@ -234,7 +277,7 @@ public class HelloWorld extends HttpServlet {
 
             stmt = con.createStatement();
             stmt.executeUpdate("DELETE FROM books WHERE id= " + Integer.toString(idDelBook));
-            logger.debug("Deleted record with id=" + Integer.toString(idDelBook));
+            logger.debug("Deleted book record with id=" + Integer.toString(idDelBook));
             stmt.close();
             con.commit();
         } catch (Exception e) {
