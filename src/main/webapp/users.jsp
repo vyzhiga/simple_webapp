@@ -11,22 +11,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Title</title>
-    <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel = "stylesheet">
+    <title>Пользователи</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-
-    <!-- CSS -->
-    <style>
-        .ui-widget-header,.ui-state-default, ui-button {
-            background:#b9cd6d;
-            border: 1px solid #b9cd6d;
-            color: #FFFFFF;
-            font-weight: bold;
-        }
-    </style>
+    <%-- Loading jquery-ui --%>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 </head>
 <body>
@@ -38,7 +29,11 @@
         </tr>
     </table>
 
-    <button type="button">Добавить пользователя</button>
+    <button type="button" id="opener">Добавить пользователя</button>
+    <div id="dialog" title="Добавить пользователя">
+        Имя пользователя: <input type="text" id="username"><br>
+        Пароль: <input type="text" id="password">
+    </div>
 
     <table>
         <thead>
@@ -72,6 +67,29 @@
                     })
             }
         }
+
+        //вызов модального диалога
+        $( "#dialog" ).dialog({
+            autoOpen: false,
+            closeOnEscape: false,
+            resizable: false,
+            modal: true,
+            buttons: {
+                OK: function() {
+                    var addUser = $("#username").val();
+                    var addUserPass = $("#password").val();
+                    $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass)
+                    $(this).dialog("close");
+                },
+                Cancel: function() {
+                    $(this).dialog("close")
+                }
+
+            }
+        });
+        $( "#opener" ).click(function() {
+            $( "#dialog" ).dialog( "open" );
+        });
 
     </script>
 

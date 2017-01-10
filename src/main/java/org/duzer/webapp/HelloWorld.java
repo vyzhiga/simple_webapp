@@ -85,6 +85,18 @@ public class HelloWorld extends HttpServlet {
             } else {
                 logger.error("!!! Exec /deluser without a parameter!");
             }
+        } else if (request.getPathInfo().equals("/adduser")) {
+            //добавляем пользователя
+            String addUser = "";
+            String addPass = "";
+            if (request.getParameter("addUser")!=null) {
+                addUser = request.getParameter("page");
+            }
+            if (request.getParameter("addPass") != null) {
+                addPass = request.getParameter("recPerPage");
+            }
+            logger.debug("Added: "+addUser+":"+addPass);
+            addUser(addUser, addPass);
         }
     }
 
@@ -160,6 +172,29 @@ public class HelloWorld extends HttpServlet {
             logger.debug("Records were inserted. End of filling");
         } catch (Exception e) {
             logger.error("!!! Init db error", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+    }
+
+    private void addUser(String addUser, String addPass) {
+    /**
+     * Добавляем пользователя
+     */
+        Connection con = null;
+        Statement stmt = null;
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            stmt = con.createStatement();
+            stmt.executeUpdate("INSERT INTO users(name, password) VALUES(" + addUser + " , " + addPass + ")");
+            stmt.close();
+            con.commit();
+        } catch (Exception e) {
+            logger.error("!!! Error adding user", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
