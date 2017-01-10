@@ -36,8 +36,8 @@
 <body>
 <table>
     <tr>
-        <td><a href="books.jsp">Книги</a></td>
-        <td><a href="users.jsp">Пользователи</a></td>
+        <td><a href="${pageContext.request.contextPath}/books.jsp">Книги</a></td>
+        <td><a href="${pageContext.request.contextPath}/hw/getusers">Пользователи</a></td>
     </tr>
 </table>
 

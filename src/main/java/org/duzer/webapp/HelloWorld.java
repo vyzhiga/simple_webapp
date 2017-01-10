@@ -73,7 +73,7 @@ public class HelloWorld extends HttpServlet {
         } else if (request.getPathInfo().equals("/getusers")) {
             //вызываем jsp с шаблонами для списка пользователей
             request.setAttribute("userList",getUsers());
-            RequestDispatcher rd = getServletContext().getRequestDispatcher("/listUsers.jsp");
+            RequestDispatcher rd = getServletContext().getRequestDispatcher("/users.jsp");
             rd.forward(request, response);
 
         } else if (request.getPathInfo().equals("/deluser")) {
