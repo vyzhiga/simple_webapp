@@ -61,10 +61,7 @@
         function jsDeleteUser(userid) {
             var r = confirm("Удалить пользователя с id="+userid +"?");
             if (r == true) {
-                $.get("${pageContext.request.contextPath}/hw/deluser?idDelUser="+userid)
-                    .done(function() {
-                        location.reload();
-                    })
+                window.location.href = "${pageContext.request.contextPath}/hw/deluser?id="+userid;
             }
         }
 

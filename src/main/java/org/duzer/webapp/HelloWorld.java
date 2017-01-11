@@ -78,13 +78,13 @@ public class HelloWorld extends HttpServlet {
 
         } else if (request.getPathInfo().equals("/deluser")) {
             //удаляем пользователя
-            int idDelUser;
-            if (request.getParameter("idDelUser") !=null) {
-                idDelUser = Integer.parseInt(request.getParameter("idDelUser"));
-                delUsers(idDelUser);
+            String userIdParam = request.getParameter("id");
+            if (userIdParam !=null && !userIdParam.isEmpty()) {
+                delUsers(Integer.parseInt(userIdParam));
             } else {
                 logger.error("!!! Exec /deluser without a parameter!");
             }
+            response.sendRedirect(request.getContextPath()+"/hw/getusers");
         } else if (request.getPathInfo().equals("/adduser")) {
             //добавляем пользователя
             String addUser = "";
