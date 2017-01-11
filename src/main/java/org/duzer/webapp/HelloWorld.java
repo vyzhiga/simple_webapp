@@ -90,13 +90,16 @@ public class HelloWorld extends HttpServlet {
             String addUser = "";
             String addPass = "";
             if (request.getParameter("addUser")!=null) {
-                addUser = request.getParameter("page");
+                addUser = request.getParameter("addUser");
             }
             if (request.getParameter("addPass") != null) {
-                addPass = request.getParameter("recPerPage");
+                addPass = request.getParameter("addPass");
             }
-            logger.debug("Added: "+addUser+":"+addPass);
-            addUser(addUser, addPass);
+            if (addUser != null && !addUser.isEmpty() && addPass!= null) {
+                addUser(addUser, addPass);
+            } else {
+                logger.debug("!!! Error: user or pass is null or user is empty string");
+            }
         }
     }
 
@@ -124,9 +127,9 @@ public class HelloWorld extends HttpServlet {
 
             //Create and fill Users table
             stmt.executeUpdate("CREATE TABLE users(id INT NOT NULL AUTO_INCREMENT primary key, name varchar(255) NOT NULL UNIQUE, password varchar(255))");
-            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Иванов','xxx')");
-            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Петров','xxx')");
-            stmt.executeUpdate("INSERT INTO users(name, password) VALUES('Сидоров','xxx')");
+            stmt.executeUpdate("INSERT INTO users (name, password) VALUES ('Иванов','xxx')");
+            stmt.executeUpdate("INSERT INTO users (name, password) VALUES ('Петров','xxx')");
+            stmt.executeUpdate("INSERT INTO users (name, password) VALUES ('Сидоров','xxx')");
             logger.debug("Finished initial filling of users");
 
             //Create and fill Book table
@@ -190,7 +193,8 @@ public class HelloWorld extends HttpServlet {
             con.setAutoCommit(false);
 
             stmt = con.createStatement();
-            stmt.executeUpdate("INSERT INTO users(name, password) VALUES(" + addUser + " , " + addPass + ")");
+            stmt.executeUpdate("INSERT INTO users(name, password) VALUES ('" + addUser + "', '" + addPass + "')");
+            logger.debug("Added: " + addUser + ":" + addPass);
             stmt.close();
             con.commit();
         } catch (Exception e) {
