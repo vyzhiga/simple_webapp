@@ -75,6 +75,7 @@
                 OK: function() {
                     var addUser = $("#username").val();
                     var addUserPass = $("#password").val();
+                    console.log("username", addUser);
                     $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass)
                     $(this).dialog("close");
                 },
