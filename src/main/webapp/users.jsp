@@ -22,12 +22,7 @@
 </head>
 <body>
 
-    <table>
-        <tr>
-            <td><a href="${pageContext.request.contextPath}/books.jsp">Книги</a></td>
-            <td><a href="${pageContext.request.contextPath}/hw/getusers">Пользователи</a></td>
-        </tr>
-    </table>
+    <%@ include file="header.jsp"%>
 
     <button type="button" id="opener">Добавить пользователя</button>
     <div id="dialog" title="Добавить пользователя">
