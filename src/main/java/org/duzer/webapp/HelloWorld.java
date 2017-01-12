@@ -96,7 +96,9 @@ public class HelloWorld extends HttpServlet {
                 addPass = request.getParameter("addPass");
             }
             if (addUser != null && !addUser.isEmpty() && addPass!= null) {
-                addUser(addUser, addPass);
+                //addUser(addUser, addPass);
+                response.setContentType("application/json");
+                response.getWriter().write(addUser(addUser, addPass));
             } else {
                 logger.debug("!!! Error: user or pass is null or user is empty string");
             }
@@ -181,28 +183,47 @@ public class HelloWorld extends HttpServlet {
         }
     }
 
-    private void addUser(String addUser, String addPass) {
+    private String addUser(String addUser, String addPass) {
     /**
      * Добавляем пользователя
      */
         Connection con = null;
         Statement stmt = null;
+        int numUsers = 0;
+        String res = "{\"Result\":1}";
 
         try {
             con = getConnection();
             con.setAutoCommit(false);
 
             stmt = con.createStatement();
-            stmt.executeUpdate("INSERT INTO users(name, password) VALUES ('" + addUser + "', '" + addPass + "')");
-            logger.debug("Added: " + addUser + ":" + addPass);
-            stmt.close();
-            con.commit();
+
+            //проверяем количество пользователей с добавляемым именем
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(name) FROM users WHERE name='"+addUser+"'");
+            //первый ряд в ResultSet, т.к. COUNT, он должен быть единственный
+            rs.first();
+            numUsers = rs.getInt(1);
+            //пишем в лог
+            logger.debug("Number of users '"+addUser+"' in DB: "+String.valueOf(numUsers));
+
+            if (numUsers==0) {
+                //пользователи с таким именем отсутствуют, добавляем
+                stmt.executeUpdate("INSERT INTO users(name, password) VALUES ('" + addUser + "', '" + addPass + "')");
+                logger.debug("Added user with passwd: " + addUser + ":" + addPass);
+                stmt.close();
+                con.commit();
+                res = "{\"Result\":0}";
+            } else {
+                //пользователи существуют, пропускаем
+                logger.debug("User "+addUser+" already exists. Skipping.");
+            }
         } catch (Exception e) {
             logger.error("!!! Error adding user", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
         }
+        return res;
     }
 
     private List<librarianUser> getUsers() {

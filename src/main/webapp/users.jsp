@@ -61,7 +61,7 @@
         }
 
         //вызов модального диалога
-        $( "#dialog" ).dialog({
+        $("#dialog").dialog({
             autoOpen: false,
             closeOnEscape: false,
             resizable: false,
@@ -71,7 +71,13 @@
                     var addUser = $("#username").val();
                     var addUserPass = $("#password").val();
                     console.log("username", addUser);
-                    $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass)
+                    $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass,
+                        function(data) {
+                            if (data.Result == 1) {
+                                alert("Пользователь с именем "+addUser+" уже существует! Укажите другое имя.");
+                            }
+                        }, "json"
+                    )
                     $(this).dialog("close");
                 },
                 Cancel: function() {
@@ -81,7 +87,7 @@
             }
         });
         $( "#opener" ).click(function() {
-            $( "#dialog" ).dialog( "open" );
+            $("#dialog").dialog("open");
         });
 
     </script>
