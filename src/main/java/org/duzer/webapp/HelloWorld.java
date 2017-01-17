@@ -100,7 +100,20 @@ public class HelloWorld extends HttpServlet {
                 response.setContentType("application/json");
                 response.getWriter().write(addUser(addUser, addPass));
             } else {
-                logger.debug("!!! Error: user or pass is null or user is empty string");
+                logger.error("!!! Error: user or pass is null or user is empty string");
+            }
+        } else if (request.getPathInfo().equals("/getuserdetails")) {
+            //получаем имя пользователя и пароль
+            int userId = 0;
+            if (request.getParameter("userid")!=null) {
+                userId = Integer.parseInt(request.getParameter("userid"));
+                logger.debug("/getuserdetails?userid="+Integer.toString(userId));
+            }
+            if (userId != 0) {
+                response.setContentType("application/json");
+                response.getWriter().write(getUserDetails(userId));
+            } else {
+                logger.error("!!! Error: have not received user id (userId=0");
             }
         }
     }
@@ -223,6 +236,36 @@ public class HelloWorld extends HttpServlet {
             closeQuiet(stmt);
             closeQuiet(con);
         }
+        return res;
+    }
+
+    private String getUserDetails(int userId) {
+        /**
+         *  возвращаем данные по пользователю: имя и пароль
+         */
+        Connection con = null;
+        Statement stmt = null;
+        //возвращаем результат. по дефолту - неудача
+        String res = "{\"Result\":0}";
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            stmt = con.createStatement();
+            //выборка
+            ResultSet rs = stmt.executeQuery("SELECT name AS username, password AS pass FROM users WHERE id="+userId);
+            //одна запись из всей таблицы, т.к. id уникальный
+            rs.first();
+            //собираем ответ
+            res = "{\"user\":\""+rs.getString("username")+"\", \"pass\":\""+rs.getString("pass")+"\", \"Result\":1}";
+            logger.debug("JSON user details:"+res);
+        } catch (Exception e) {
+                logger.error("!!! Error getting user details", e);
+            } finally {
+                closeQuiet(stmt);
+                closeQuiet(con);
+            }
         return res;
     }
 

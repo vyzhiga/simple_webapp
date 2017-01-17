@@ -22,75 +22,107 @@
 </head>
 <body>
 
-    <%@ include file="header.jsp"%>
+<%@ include file="header.jsp"%>
 
-    <button type="button" id="opener">Добавить пользователя</button>
-    <div id="dialog" title="Добавить пользователя">
-        Имя пользователя: <input type="text" id="username"><br>
-        Пароль: <input type="text" id="password">
-    </div>
+<button type="button" id="opener">Добавить пользователя</button>
+<div id="dialog" title="Добавить пользователя">
+    Имя пользователя: <input type="text" id="username"><br>
+    Пароль: <input type="text" id="password">
+</div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Пользователь</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-        <c:forEach items="${requestScope.userList}" var="user">
-            <tr>
-                <td><c:out value="${user.userId}"></c:out></td>
-                <td><a href="#"><c:out value="${user.userName}"></c:out></a></td>
-                <!-- кнопка удаления -->
-                <td><input type="button" value="Удалить" onclick="jsDeleteUser(<c:out value="${user.userId}"></c:out>)"></td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Пользователь</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <c:forEach items="${requestScope.userList}" var="user">
+        <tr>
+            <td><c:out value="${user.userId}"></c:out></td>
+            <td><a href="#" onclick="jsGetUserDetails(<c:out value="${user.userId}"></c:out>)"><c:out value="${user.userName}"></c:out></a></td>
+            <!-- кнопка удаления -->
+            <td><input type="button" value="Удалить" onclick="jsDeleteUser(<c:out value="${user.userId}"></c:out>)"></td>
+        </tr>
+    </c:forEach>
+    </tbody>
+</table>
 
-    <script type="text/javascript" language="javascript">
+<script type="text/javascript" language="javascript">
 
-        //удаляем книгу
-        function jsDeleteUser(userid) {
-            var r = confirm("Удалить пользователя с id="+userid +"?");
-            if (r == true) {
-                window.location.href = "${pageContext.request.contextPath}/hw/deluser?id="+userid;
-            }
+    //удаляем книгу
+    function jsDeleteUser(userid) {
+        var r = confirm("Удалить пользователя с id="+userid +"?");
+        if (r == true) {
+            window.location.href = "${pageContext.request.contextPath}/hw/deluser?id="+userid;
         }
+    }
 
-        //вызов модального диалога
-        $("#dialog").dialog({
-            autoOpen: false,
-            closeOnEscape: false,
-            resizable: false,
-            modal: true,
-            buttons: {
-                OK: function() {
-                    var addUser = $("#username").val();
-                    var addUserPass = $("#password").val();
-                    console.log("username", addUser);
-                    $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass,
-                        function(data) {
-                            if (data.Result == 1) {
-                                alert("Пользователь с именем "+addUser+" уже существует! Укажите другое имя.");
-                            }
-                        }, "json"
-                    )
-                    $(this).dialog("close");
-                },
-                Cancel: function() {
-                    $(this).dialog("close")
+    function jsGetUserDetails(userid) {
+        $.get("${pageContext.request.contextPath}/hw/getuserdetails?userid="+userid,
+            function(data) {
+                if (data.Result == 1) {
+                    $("#username").prop("disabled", true);
+                    $("#password").prop("disabled", true);
+                    $("#username").val(data.user);
+                    $("#password").val(data.pass);
+                    $("#dialog").dialog("option", {
+                            title : "Пользователь "+data.user ,
+                            buttons : { OK : function() {$(this).dialog("close");}}
+                        }
+                    );
+                    $("#dialog").dialog("open");
                 }
+            }, "json"
+        )
+    }
 
+    //вызов модального диалога
+    $("#dialog").dialog({
+        autoOpen: false,
+        closeOnEscape: false,
+        resizable: false,
+        modal: true,
+        close: function() {
+            window.location.href = "${pageContext.request.contextPath}/hw/getusers";
+        }
+    });
+    $( "#opener" ).click(function() {
+        $("#username").val("");
+        $("#password").val("");
+        $("#username").prop("disabled", false);
+        $("#password").prop("disabled", false);
+        $("#dialog").dialog("option", {
+                title : "Добавить пользователя",
+                buttons: {
+                    OK: function() {
+                        var addUser = $("#username").val();
+                        var addUserPass = $("#password").val();
+                        console.log("username", addUser);
+                        $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass,
+                            function(data) {
+                                if (data.Result == 1) {
+                                    alert("Пользователь с именем "+addUser+" уже существует! Укажите другое имя.");
+                                }
+                            }, "json"
+                        )
+                            .done(function() {
+                                $("#dialog").dialog("close");
+                            })
+                    },
+                    Cancel: function() {
+                        $(this).dialog("close")
+                    }
+
+                }
             }
-        });
-        $( "#opener" ).click(function() {
-            $("#dialog").dialog("open");
-        });
+        );
+        $("#dialog").dialog("open");
+    });
 
-    </script>
+</script>
 
 </body>
 </html>
