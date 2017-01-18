@@ -61,16 +61,39 @@
     }
 
     function jsGetUserDetails(userid) {
+        //диалог информации о пользователе/смены пароля
         $.get("${pageContext.request.contextPath}/hw/getuserdetails?userid="+userid,
             function(data) {
                 if (data.Result == 1) {
                     $("#username").prop("disabled", true);
-                    $("#password").prop("disabled", true);
                     $("#username").val(data.user);
                     $("#password").val(data.pass);
-                    $("#dialog").dialog("option", {
+                        $("#dialog").dialog("option", {
                             title : "Пользователь "+data.user ,
-                            buttons : { OK : function() {$(this).dialog("close");}}
+                            //buttons : { OK : function() {$(this).dialog("close");}}
+                            buttons: {
+                                "Изменить пароль": function() {
+                                    var UserPass = $("#password").val();
+                                    if (UserPass != "") {
+                                        $.get("${pageContext.request.contextPath}/hw/updateuserpass?userid="+userid+"&newpass="+UserPass,
+                                            function(data) {
+                                                if (data.Result == 1) {
+                                                    alert("Пароль успешно изменен!");
+                                                } else {
+                                                    alert("Ошибка при смене пароля!");
+                                                }
+                                            }, "json"
+                                        )
+                                            .done(function() {
+                                                $("#dialog").dialog("close");
+                                            })
+                                    } else {alert("Пароль не может быть пустым!")}
+                                },
+                                "Отмена": function() {
+                                    $(this).dialog("close")
+                                }
+
+                            }
                         }
                     );
                     $("#dialog").dialog("open");
@@ -89,30 +112,39 @@
             window.location.href = "${pageContext.request.contextPath}/hw/getusers";
         }
     });
+    //выозов диалога добавления пользователя
     $( "#opener" ).click(function() {
         $("#username").val("");
         $("#password").val("");
         $("#username").prop("disabled", false);
         $("#password").prop("disabled", false);
         $("#dialog").dialog("option", {
+                //заголовок
                 title : "Добавить пользователя",
+                //кнопки
                 buttons: {
-                    OK: function() {
+                    "OK": function() {
                         var addUser = $("#username").val();
                         var addUserPass = $("#password").val();
-                        console.log("username", addUser);
+                        var dialogExit = false;
+                        if (addUserPass != "") {
                         $.get("${pageContext.request.contextPath}/hw/adduser?addUser="+addUser+"&addPass="+addUserPass,
                             function(data) {
                                 if (data.Result == 1) {
                                     alert("Пользователь с именем "+addUser+" уже существует! Укажите другое имя.");
+                                } else if (data.Result == 0) {
+                                    dialogExit = true;
                                 }
                             }, "json"
                         )
                             .done(function() {
-                                $("#dialog").dialog("close");
+                                if (dialogExit == true) {
+                                    $("#dialog").dialog("close");
+                                }
                             })
+                        } else {alert("Пароль не может быть пустым!")};
                     },
-                    Cancel: function() {
+                    "Отмена": function() {
                         $(this).dialog("close")
                     }
 

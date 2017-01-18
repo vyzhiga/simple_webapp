@@ -115,6 +115,26 @@ public class HelloWorld extends HttpServlet {
             } else {
                 logger.error("!!! Error: have not received user id (userId=0");
             }
+        } else if (request.getPathInfo().equals("/updateuserpass")) {
+            //апдейтим пароль пользователя
+            int userId = 0;
+            String newPass = "";
+
+            if (request.getParameter("userid")!=null) {
+                userId = Integer.parseInt(request.getParameter("userid"));
+            }
+            if (request.getParameter("newpass")!=null) {
+                newPass= request.getParameter("newpass");
+            }
+            logger.debug("Changing password for userid="+userId+". New password is '"+newPass+"'.");
+
+            if (userId != 0 && newPass !="") {
+                response.setContentType("application/json");
+                response.getWriter().write(updateUserPass(userId,newPass));
+            } else {
+                logger.error("!!! Error: have not received user id (userId=0");
+            }
+
         }
     }
 
@@ -260,12 +280,46 @@ public class HelloWorld extends HttpServlet {
             //собираем ответ
             res = "{\"user\":\""+rs.getString("username")+"\", \"pass\":\""+rs.getString("pass")+"\", \"Result\":1}";
             logger.debug("JSON user details:"+res);
+            stmt.close();
         } catch (Exception e) {
                 logger.error("!!! Error getting user details", e);
             } finally {
                 closeQuiet(stmt);
                 closeQuiet(con);
             }
+        return res;
+    }
+
+    private String updateUserPass(int userId, String newPass) {
+        /**
+         * апдейтием пароль пользователя, если он непустой
+         */
+        Connection con = null;
+        Statement stmt = null;
+        //возвращаем результат. по дефолту - неудача
+        String res = "{\"Result\":0}";
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            stmt = con.createStatement();
+            //выборка
+            stmt.executeUpdate("UPDATE users SET password='"+newPass+"' WHERE id="+userId);
+            //возвращаем ответ
+            res = "{\"Result\":1}";
+            logger.debug("Password for userid="+userId+" has been successfully changed.");
+
+            stmt.close();
+            con.commit();
+
+        } catch (Exception e) {
+            logger.error("!!! Error updating password", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+
         return res;
     }
 
