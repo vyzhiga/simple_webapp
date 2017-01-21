@@ -32,6 +32,9 @@ public class HelloWorld extends HttpServlet {
     //logging init
     final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
+    //current user debug variable
+    private static String curUser = "";
+
     public void init() {
         // Do required initialization
         initDb();
@@ -56,7 +59,10 @@ public class HelloWorld extends HttpServlet {
             if (request.getParameter("recPerPage") != null) {
                 recPerPage = Integer.parseInt(request.getParameter("recPerPage"));
             }
+            // добавляем атрибут со списком пользователей
             request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
+            // добавляем атрибут со строкой текущего пользователя
+            request.setAttribute("curUser", curUser);
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
 
@@ -135,6 +141,15 @@ public class HelloWorld extends HttpServlet {
                 logger.error("!!! Error: have not received user id (userId=0");
             }
 
+        } else if (request.getPathInfo().equals("/setuser")) {
+            //определяем переменную текущего пользователя
+            if (request.getParameter("username")!=null) {
+                curUser = request.getParameter("username");
+                logger.debug("Set curUser to '" + curUser + "'.");
+                request.setAttribute("curUser", curUser);
+                RequestDispatcher rd = getServletContext().getRequestDispatcher("/usersdebug.jsp");
+                rd.forward(request, response);
+            }
         }
     }
 
