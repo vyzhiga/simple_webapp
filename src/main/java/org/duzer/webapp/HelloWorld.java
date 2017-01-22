@@ -150,6 +150,26 @@ public class HelloWorld extends HttpServlet {
                 RequestDispatcher rd = getServletContext().getRequestDispatcher("/usersdebug.jsp");
                 rd.forward(request, response);
             }
+        } else if (request.getPathInfo().equals("/changetaker")) {
+            int bookid;
+            int action;
+            String username;
+            if (request.getParameter("bookid") != null && request.getParameter("action") != null && request.getParameter("username")!=null) {
+                bookid = Integer.parseInt(request.getParameter("bookid"));
+                action = Integer.parseInt(request.getParameter("action"));
+                username = request.getParameter("username");
+                logger.debug("Changing taker, parameters: bookid/action/username"+bookid+"/"+action+"/"+username);
+                switch (action) {
+                    case 0: changeTaker(bookid, action, username);
+                            break;
+                    case 1: changeTaker(bookid, action, username);
+                            break;
+                    default:    logger.error("!!! Error: wrong action in /changetaker. Should be 0 or 1.");
+                                break;
+                }
+            } else {
+                logger.error("!!! Error: undefined parameters in /changetaker");
+            }
         }
     }
 
@@ -336,6 +356,36 @@ public class HelloWorld extends HttpServlet {
         }
 
         return res;
+    }
+
+    public void changeTaker(int bookId, int action, String username) {
+        /**
+         *  берем книгу пользователем, либо возвращаем ее
+         */
+        Connection con = null;
+        Statement stmt = null;
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            stmt = con.createStatement();
+
+            if (action == 0) {
+                stmt.executeUpdate("UPDATE books SET takerid=NULL WHERE bookid=" + bookId);
+            } else if (action == 1) {
+                stmt.executeUpdate("UPDATE books SET takerid=(SELECT id FROM users WHERE name = '" + username + "') WHERE bookid=" + bookId);
+            }
+
+            stmt.close();
+            con.commit();
+
+        } catch (Exception e) {
+            logger.error("!!! Error changing book owner", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
     }
 
     private List<librarianUser> getUsers() {

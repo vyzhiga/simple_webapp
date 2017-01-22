@@ -19,13 +19,13 @@
             <%-- вернуть, если пользователи совпадают --%>
             <c:when test="${book.bookTaker==curUser}">
                 <td>
-                    <input type="button" value="Вернуть">
+                    <input type="button" value="Вернуть" onclick="jsChangeTaker(<c:out value="${book.idBook}"></c:out>,0,<c:out value="${curUser}"></c:out>)">
                 </td>
             </c:when>
             <%-- взять, если книга никем не взята --%>
             <c:when test="${book.bookTaker==null && curUser!=\"\"}">
                 <td>
-                    <input type="button" value="Взять">
+                    <input type="button" value="Взять" onclick="jsChangeTaker(${book.idBook},1,${curUser})">
                 </td>
             </c:when>
             <%-- вернуть имя пользователя, вхявшего книгу --%>

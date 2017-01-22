@@ -86,6 +86,19 @@
         }
     }
 
+    function jsChangeTaker(bookid, action, username) {
+        // bookid - id книги
+        // action - действие, 1 - взять, 0 - вернуть
+        // username - имя "текущего" пользователя
+        console.log("bookid", bookid);
+        console.log("action", action);
+        console.log("username", username);
+        $.get("${pageContext.request.contextPath}/hw/changetaker?bookid="+bookid+"&action="+action+"&username="+username)
+            .done(function() {
+                location.reload();
+            })
+    }
+
 </script>
 
 </body>
