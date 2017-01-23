@@ -15,39 +15,37 @@
 </head>
 <body>
 
-<c:set var="jspCurUser" value="${curUser}"/>
+    <%@ include file="header.jsp"%>
 
-<%@ include file="header.jsp"%>
+    <c:if test="${empty sessionScope.sesCurUser}">
+        Debug: Current user is not set yet.
+    </c:if>
+    <c:if test="${not empty sessionScope.sesCurUser}">
+        Debug: Current user is set to <c:out value="${sesCurUser}"></c:out>
+    </c:if>
 
-<sql:setDataSource var="h2db" driver="org.h2.Driver"
-                   url="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
-                   user=""  password=""/>
+    <br>
 
-<sql:query dataSource="${h2db}" var="result">
-    SELECT id, name FROM users;
-</sql:query>
+    <sql:setDataSource var="h2db" driver="org.h2.Driver"
+                       url="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+                       user=""  password=""/>
 
-<form action="${pageContext.request.contextPath}/hw/setuser" method="get">
-    <fieldset>
-        <legend>Select user:</legend>
-        User:
-        <select name="username">
-            <c:forEach var="row" items="${result.rows}">
-                <option value="<c:out value="${row.name}"/>"><c:out value="${row.name}"/></option>
-            </c:forEach>
-        </select>
-        <input type="submit" value="Set">
-    </fieldset>
-</form>
-<%
-    String curUser = String.valueOf(request.getAttribute("curUser"));
-    if (request.getAttribute("curUser")!=null) {
-%>
-        Current user is set to <%= curUser%>
-        <br>
-        <c:out value="${jspCurUser}"></c:out>
-<%
-    }
-%>
+    <sql:query dataSource="${h2db}" var="result">
+        SELECT id, name FROM users;
+    </sql:query>
+
+    <form action="${pageContext.request.contextPath}/hw/setuser" method="get">
+        <fieldset>
+            <legend>Select user:</legend>
+            User:
+            <select name="username">
+                <c:forEach var="row" items="${result.rows}">
+                    <option value="<c:out value="${row.name}"/>"><c:out value="${row.name}"/></option>
+                </c:forEach>
+            </select>
+            <input type="submit" value="Set">
+        </fieldset>
+    </form>
+
 </body>
 </html>

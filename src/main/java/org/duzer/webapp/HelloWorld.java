@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -32,18 +33,24 @@ public class HelloWorld extends HttpServlet {
     //logging init
     final static Logger logger = LoggerFactory.getLogger(HelloWorld.class);
 
-    //current user debug variable
-    private static String curUser = "";
-
     public void init() {
         // Do required initialization
         initDb();
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //устанавливаем тип страницы и кодировки
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
+
+        // создание объекта сессии, если еще не была создана
+        HttpSession session = request.getSession(true);
+        // проверяем, есть ли параметр сессии, устанавливаем, если нет
+        String param = (String) session.getAttribute("sesCurUser");
+        if (param == null) {
+            session.setAttribute("sesCurUser", "");
+        }
 
         if (request.getPathInfo().equals("/initdb")) {
             //инициализация БД
@@ -62,8 +69,6 @@ public class HelloWorld extends HttpServlet {
             }
             // добавляем атрибут со списком пользователей
             request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
-            // добавляем атрибут со строкой текущего пользователя
-            request.setAttribute("curUser", curUser);
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
 
@@ -145,9 +150,8 @@ public class HelloWorld extends HttpServlet {
         } else if (request.getPathInfo().equals("/setuser")) {
             //определяем переменную текущего пользователя
             if (request.getParameter("username")!=null) {
-                curUser = request.getParameter("username");
-                logger.debug("Set curUser to '" + curUser + "'.");
-                request.setAttribute("curUser", curUser);
+                session.setAttribute("sesCurUser", request.getParameter("username"));
+                logger.debug("Set curUser to '" + session.getAttribute("sesCurUser") + "'.");
                 RequestDispatcher rd = getServletContext().getRequestDispatcher("/usersdebug.jsp");
                 rd.forward(request, response);
             }

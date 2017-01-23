@@ -24,6 +24,15 @@
 
 <%@ include file="header.jsp"%>
 
+<c:if test="${empty sessionScope.sesCurUser}">
+    Debug: Current user is not set yet.
+</c:if>
+<c:if test="${not empty sessionScope.sesCurUser}">
+    Debug: Current user is set to <c:out value="${sesCurUser}"></c:out>
+</c:if>
+
+<br>
+
 <button type="button" id="opener">Добавить пользователя</button>
 <div id="dialog" title="Добавить пользователя">
     Имя пользователя: <input type="text" id="username"><br>

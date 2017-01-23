@@ -17,15 +17,15 @@
         <!-- колонка "Кем взята" -->
         <c:choose>
             <%-- вернуть, если пользователи совпадают --%>
-            <c:when test="${book.bookTaker==curUser}">
+            <c:when test="${book.bookTaker==sesCurUser}">
                 <td>
-                    <input type="button" value="Вернуть" onclick="jsChangeTaker(${book.idBook}, 0, '${curUser}')">
+                    <input type="button" value="Вернуть" onclick="jsChangeTaker(${book.idBook}, 0, '${sesCurUser}')">
                 </td>
             </c:when>
             <%-- взять, если книга никем не взята --%>
-            <c:when test="${book.bookTaker==null && curUser!=\"\"}">
+            <c:when test="${book.bookTaker==null && not empty sesCurUser}">
                 <td>
-                    <input type="button" value="Взять" onclick="jsChangeTaker(${book.idBook}, 1, '${curUser}')">
+                    <input type="button" value="Взять" onclick="jsChangeTaker(${book.idBook}, 1, '${sesCurUser}')">
                 </td>
             </c:when>
             <%-- вернуть имя пользователя, вхявшего книгу --%>
