@@ -19,13 +19,13 @@
             <%-- вернуть, если пользователи совпадают --%>
             <c:when test="${book.bookTaker==curUser}">
                 <td>
-                    <input type="button" value="Вернуть" onclick="jsChangeTaker(<c:out value="${book.idBook}"></c:out>,0,<c:out value="${curUser}"></c:out>)">
+                    <input type="button" value="Вернуть" onclick="jsChangeTaker(${book.idBook}, 0, '${curUser}')">
                 </td>
             </c:when>
             <%-- взять, если книга никем не взята --%>
             <c:when test="${book.bookTaker==null && curUser!=\"\"}">
                 <td>
-                    <input type="button" value="Взять" onclick="jsChangeTaker(${book.idBook},1,${curUser})">
+                    <input type="button" value="Взять" onclick="jsChangeTaker(${book.idBook}, 1, '${curUser}')">
                 </td>
             </c:when>
             <%-- вернуть имя пользователя, вхявшего книгу --%>
@@ -36,6 +36,6 @@
             </c:otherwise>
         </c:choose>
         <!-- кнопка удаления -->
-        <td><input type="button" value="Удалить" onclick="jsDeleteBook(<c:out value="${book.idBook}"></c:out>)"></td>
+        <td><input type="button" value="Удалить" onclick="jsDeleteBook(${book.idBook})"></td>
     </tr>
 </c:forEach>

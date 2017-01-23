@@ -43,6 +43,7 @@ public class HelloWorld extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
 
         if (request.getPathInfo().equals("/initdb")) {
             //инициализация БД
