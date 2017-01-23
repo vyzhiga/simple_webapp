@@ -373,9 +373,9 @@ public class HelloWorld extends HttpServlet {
             stmt = con.createStatement();
 
             if (action == 0) {
-                stmt.executeUpdate("UPDATE books SET takerid=NULL WHERE bookid=" + bookId);
+                stmt.executeUpdate("UPDATE books SET takerid=NULL WHERE id=" + bookId);
             } else if (action == 1) {
-                stmt.executeUpdate("UPDATE books SET takerid=(SELECT id FROM users WHERE name = '" + username + "') WHERE bookid=" + bookId);
+                stmt.executeUpdate("UPDATE books SET takerid=(SELECT id FROM users WHERE name = '" + username + "') WHERE id=" + bookId);
             }
 
             stmt.close();
