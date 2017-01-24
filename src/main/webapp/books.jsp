@@ -38,15 +38,6 @@
 
 <%@ include file="header.jsp"%>
 
-<c:if test="${empty sessionScope.sesCurUser}">
-    Debug: Current user is not set yet.
-</c:if>
-<c:if test="${not empty sessionScope.sesCurUser}">
-    Debug: Current user is set to <c:out value="${sesCurUser}"></c:out>
-</c:if>
-
-<br>
-
 <div style="margin: 5px 0">
     <input id="load" type="button" value="Load Books"/>
     <input id="recqnt" type="number" min="1" defaultValue="5" value="5"/>

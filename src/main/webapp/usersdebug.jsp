@@ -17,15 +17,6 @@
 
     <%@ include file="header.jsp"%>
 
-    <c:if test="${empty sessionScope.sesCurUser}">
-        Debug: Current user is not set yet.
-    </c:if>
-    <c:if test="${not empty sessionScope.sesCurUser}">
-        Debug: Current user is set to <c:out value="${sesCurUser}"></c:out>
-    </c:if>
-
-    <br>
-
     <sql:setDataSource var="h2db" driver="org.h2.Driver"
                        url="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
                        user=""  password=""/>

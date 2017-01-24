@@ -8,3 +8,7 @@
         <td><a href="${pageContext.request.contextPath}/usersdebug.jsp">Users debug</a></td>
     </tr>
 </table>
+
+<div style="margin: 10px 0">
+    Debug: Current user is ${empty sesCurUser? 'not set yet': sesCurUser}.
+</div>
