@@ -12,9 +12,13 @@
 <c:forEach items="${requestScope.bookList}" var="book">
     <tr>
         <td><c:out value="${book.idBook}"></c:out></td>
+        <td><c:out value="${book.bookAuthor}"></c:out></td>
         <td><c:out value="${book.nameBook}"></c:out></td>
-        <td><c:out value="${book.ISBNBook}"></c:out></td>
-        <!-- колонка "Кем взята" -->
+        <%-- колонка ISBN--%>
+        <td>
+            <a href="#"><c:out value="${book.ISBNBook}"></c:out></a>
+        </td>
+        <%-- колонка "Кем взята" --%>
         <c:choose>
             <%-- вернуть, если пользователи совпадают --%>
             <c:when test="${book.bookTaker==sesCurUser}">

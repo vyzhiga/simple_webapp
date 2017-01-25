@@ -55,31 +55,53 @@ public class HelloWorld extends HttpServlet {
         if (request.getPathInfo().equals("/initdb")) {
             //инициализация БД
             initDb();
-            response.sendRedirect(request.getContextPath()+"/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
 
         } else if (request.getPathInfo().equals("/getbooks")) {
             //выводим список книг постранично
             int page = 1;
             int recPerPage = 5;
-            if (request.getParameter("page")!=null) {
+            if (request.getParameter("page") != null) {
                 page = Integer.parseInt(request.getParameter("page"));
             }
             if (request.getParameter("recPerPage") != null) {
                 recPerPage = Integer.parseInt(request.getParameter("recPerPage"));
             }
             // добавляем атрибут со списком пользователей
-            request.setAttribute("bookList", getBooks((page-1)*recPerPage, recPerPage));
+            request.setAttribute("bookList", getBooks((page - 1) * recPerPage, recPerPage));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
 
         } else if (request.getPathInfo().equals("/delbook")) {
             //удаляем книгу
             int idDelBook;
-            if (request.getParameter("idDelBook") !=null) {
+            if (request.getParameter("idDelBook") != null) {
                 idDelBook = Integer.parseInt(request.getParameter("idDelBook"));
                 delBooks(idDelBook);
             } else {
                 logger.error("!!! Exec /delbook without a parameter!");
+            }
+
+        } else if (request.getPathInfo().equals("/addbook")) {
+            // добавляем книгу в БД
+            String newISBN;
+            String newAuthor;
+            String newName;
+
+            // читаем параметры. проверка, что параметры указаны
+            if (request.getParameter("newISBN")!=null && request.getParameter("newAuthor")!=null && request.getParameter("newName")!=null) {
+                newISBN = request.getParameter("newISBN");
+                newAuthor = request.getParameter("newAuthor");
+                newName = request.getParameter("newName");
+                // проверка, что параметр - непустая строка
+                if (!newISBN.isEmpty() && !newAuthor.isEmpty() && !newName.isEmpty()) {
+                    response.setContentType("application/json");
+                    response.getWriter().write(addBook(newISBN, newAuthor, newName));
+                } else {
+                    logger.error("!!! addBook received at least one empty string as a parameter!");
+                }
+            } else {
+                logger.error("!!! Exec addBook without a parameter!");
             }
 
         } else if (request.getPathInfo().equals("/getusers")) {
@@ -97,6 +119,7 @@ public class HelloWorld extends HttpServlet {
                 logger.error("!!! Exec /deluser without a parameter!");
             }
             response.sendRedirect(request.getContextPath()+"/hw/getusers");
+
         } else if (request.getPathInfo().equals("/adduser")) {
             //добавляем пользователя
             String addUser = "";
@@ -114,6 +137,7 @@ public class HelloWorld extends HttpServlet {
             } else {
                 logger.error("!!! Error: user or pass is null or user is empty string");
             }
+
         } else if (request.getPathInfo().equals("/getuserdetails")) {
             //получаем имя пользователя и пароль
             int userId = 0;
@@ -127,6 +151,7 @@ public class HelloWorld extends HttpServlet {
             } else {
                 logger.error("!!! Error: have not received user id (userId=0");
             }
+
         } else if (request.getPathInfo().equals("/updateuserpass")) {
             //апдейтим пароль пользователя
             int userId = 0;
@@ -155,7 +180,9 @@ public class HelloWorld extends HttpServlet {
                 RequestDispatcher rd = getServletContext().getRequestDispatcher("/usersdebug.jsp");
                 rd.forward(request, response);
             }
+
         } else if (request.getPathInfo().equals("/changetaker")) {
+            // сдаем/берем книгу пользователем
             int bookid;
             int action;
             String username;
@@ -179,6 +206,9 @@ public class HelloWorld extends HttpServlet {
     }
 
     private void initDb() {
+        /**
+         * Заполняем таблицы users и books исходными значениями
+         */
         //DB connection vars
         Connection con = null;
         Statement stmt = null;
@@ -209,14 +239,14 @@ public class HelloWorld extends HttpServlet {
 
             //Create and fill Book table
             stmt.executeUpdate("CREATE TABLE books(id INT NOT NULL AUTO_INCREMENT primary key, isbn varchar(17) " +
-                    "NOT NULL, name varchar(50) NOT NULL, takerid int REFERENCES users(id) ON DELETE SET NULL)");
+                    "NOT NULL, author varchar(50) NOT NULL, name varchar(50) NOT NULL, takerid int REFERENCES users(id) ON DELETE SET NULL)");
             //Filling of the Book table
             for (int i=0; i<numBooks; i++) {
                 //init vars at the beginning of every iteration
                 // Starting ISBN string
                 strISBN = "-3-16-148410-0";
                 // Starting SQL statement
-                strSQLstmt = "INSERT INTO books(ISBN, name";
+                strSQLstmt = "INSERT INTO books(ISBN, author, name";
                 //Defining the random part of the ISBN
                 int partISBN = ThreadLocalRandom.current().nextInt(min, max + 1);
                 //Concat
@@ -227,15 +257,15 @@ public class HelloWorld extends HttpServlet {
                 //a book is available
                 if (initBookTaker == 0) {
                     initSQLstBookTaker = "";
-                    strSQLstmt = strSQLstmt + ") VALUES('" + strISBN + "', 'Евгений Онегин')";
+                    strSQLstmt = strSQLstmt + ") VALUES('" + strISBN + "', 'А.С. Пушкин', 'Евгений Онегин')";
                 //smb took a book
                 } else {
                     initSQLstBookTaker = Integer.toString(initBookTaker);
-                    strSQLstmt = strSQLstmt + ", takerid) VALUES('" + strISBN + "', 'Евгений Онегин', " + initSQLstBookTaker + ")";
+                    strSQLstmt = strSQLstmt + ", takerid) VALUES('" + strISBN + "', 'А.С. Пушкин', 'Евгений Онегин', " + initSQLstBookTaker + ")";
                 }
 
                 //Learn how many records returns query
-                ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, " +
+                ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.author AS BookAuthor, B.name AS BookName, " +
                         "U.name AS UserName FROM books B JOIN users U ON U.id = B.takerid ORDER BY BookISBN");
                 if (rs.next()) {
                     numRecords = rs.getInt(1);
@@ -291,11 +321,72 @@ public class HelloWorld extends HttpServlet {
                 logger.debug("User "+addUser+" already exists. Skipping.");
             }
         } catch (Exception e) {
-            logger.error("!!! Error adding user", e);
+            logger.error("!!! Error adding a user", e);
         } finally {
             closeQuiet(stmt);
             closeQuiet(con);
         }
+        return res;
+    }
+
+    private String addBook(String newISBN, String newAuthor, String newName) {
+        /**
+         * Добавляем книгу. Возвращает 1 - fail, 0 - success.
+         */
+        // для создания подключения к БД
+        Connection con = null;
+        PreparedStatement stmt = null;
+        // кол-во книг с указанным ISBN
+        int numBooks = 0;
+        // результат попытки добавления книги, возвращаемый в JSON
+        String res = "{\"Result\":1}";
+        // строки запросов для preparedStatement
+        // для SELECT
+        String selectSQL = "SELECT COUNT(ISBN) FROM books WHERE ISBN = ?";
+        // для INSERT
+        String insertSQL = "INSERT INTO books(ISBN, author, name) VALUES(?, ?, ?)";
+
+        try {
+            con = getConnection();
+            con.setAutoCommit(false);
+
+            // проверяем количество ниг с добавляемым ISBN. выполняем запрос с параметром
+            stmt = con.prepareStatement(selectSQL);
+            stmt.setString(1, newISBN);
+            // первый ряд в ResultSet, т.к. COUNT, он должен быть единственный
+            ResultSet rs = stmt.executeQuery();
+            rs.first();
+            numBooks = rs.getInt(1);
+            // пишем в лог
+            logger.debug("Number of books with ISBN '"+ newISBN +"' in DB: "+String.valueOf(numBooks));
+
+            if (numBooks==0) {
+                // книги с таким ISBN именем отсутствуют, добавляем
+                // готовим запрос INSERT
+                stmt = con.prepareStatement(insertSQL);
+                // параметры
+                stmt.setString(1, newISBN);
+                stmt.setString(2, newAuthor);
+                stmt.setString(3, newName);
+                // выполняем
+                stmt.executeUpdate();
+                //stmt.executeUpdate("INSERT INTO users(name, password) VALUES ('" + addUser + "', '" + addPass + "')");
+                logger.debug("Added book with ISBN:" + newISBN+ ", author:" + newAuthor + ", name: " + newName);
+                stmt.close();
+                con.commit();
+                res = "{\"Result\":0}";
+            } else {
+                //пользователи существуют, пропускаем
+                logger.debug("Book ISBN: "+ newISBN +" already exists. Skipping.");
+            }
+
+        } catch (Exception e) {
+            logger.error("!!! Error adding a book", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+
         return res;
     }
 
@@ -433,6 +524,11 @@ public class HelloWorld extends HttpServlet {
     }
 
     private List<LibrarianBook> getBooks(int offset, int recPerPage) {
+        /**
+         * читаем скриптом список нужного количества книг из таблицы books
+         * с указанным смещением, сортируем, добавляем в список и возвращаем
+         * список книг
+         */
         Connection con = null;
         Statement stmt = null;
 
@@ -442,11 +538,8 @@ public class HelloWorld extends HttpServlet {
 
             con.setAutoCommit(false);
             stmt = con.createStatement();
-            /* ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
-                    "AS UserName FROM books B JOIN users U ON U.id = B.takerid ORDER BY BookISBN LIMIT " +
-                    Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset)); */
 
-            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.name AS BookName, U.name " +
+            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.author AS BookAuthor, B.name AS BookName, U.name " +
                     "AS UserName FROM books AS B LEFT JOIN users AS U ON B.takerid = U.id ORDER BY BookISBN LIMIT " +
                     Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset));
 
@@ -454,6 +547,7 @@ public class HelloWorld extends HttpServlet {
                 LibrarianBook book = new LibrarianBook();
                 book.setIdBook(rs.getInt("BookID"));
                 book.setISBNBook(rs.getString("BookISBN"));
+                book.setBookAuthor(rs.getString("BookAuthor"));
                 book.setNameBook(rs.getString("BookName"));
                 book.setBookTaker(rs.getString("UserName"));
                 books.add(book);

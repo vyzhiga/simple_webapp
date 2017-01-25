@@ -7,6 +7,7 @@ package org.duzer.webapp;
 public class LibrarianBook {
 
     private int idBook;
+    private String bookAuthor;
     private String nameBook;
     private String ISBNBook;
     private String bookTaker;
@@ -41,6 +42,14 @@ public class LibrarianBook {
 
     public void setBookTaker(String bookTaker) {
         this.bookTaker = bookTaker;
+    }
+
+    public String getBookAuthor() {
+        return bookAuthor;
+    }
+
+    public void setBookAuthor(String bookAuthor) {
+        this.bookAuthor = bookAuthor;
     }
 }
 

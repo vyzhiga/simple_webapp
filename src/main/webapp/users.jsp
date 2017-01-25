@@ -112,7 +112,7 @@
             window.location.href = "${pageContext.request.contextPath}/hw/getusers";
         }
     });
-    //выозов диалога добавления пользователя
+    //вызов диалога добавления пользователя
     $( "#opener" ).click(function() {
         $("#username").val("");
         $("#password").val("");
