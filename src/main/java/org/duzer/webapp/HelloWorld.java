@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Result;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class HelloWorld extends HttpServlet {
             String newName;
 
             // читаем параметры. проверка, что параметры указаны
-            if (request.getParameter("newISBN")!=null && request.getParameter("newAuthor")!=null && request.getParameter("newName")!=null) {
+            if (request.getParameter("newISBN") != null && request.getParameter("newAuthor") != null && request.getParameter("newName") != null) {
                 newISBN = request.getParameter("newISBN");
                 newAuthor = request.getParameter("newAuthor");
                 newName = request.getParameter("newName");
@@ -106,31 +107,31 @@ public class HelloWorld extends HttpServlet {
 
         } else if (request.getPathInfo().equals("/getusers")) {
             //вызываем jsp с шаблонами для списка пользователей
-            request.setAttribute("userList",getUsers());
+            request.setAttribute("userList", getUsers());
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/users.jsp");
             rd.forward(request, response);
 
         } else if (request.getPathInfo().equals("/deluser")) {
             //удаляем пользователя
             String userIdParam = request.getParameter("id");
-            if (userIdParam !=null && !userIdParam.isEmpty()) {
+            if (userIdParam != null && !userIdParam.isEmpty()) {
                 delUsers(Integer.parseInt(userIdParam));
             } else {
                 logger.error("!!! Exec /deluser without a parameter!");
             }
-            response.sendRedirect(request.getContextPath()+"/hw/getusers");
+            response.sendRedirect(request.getContextPath() + "/hw/getusers");
 
         } else if (request.getPathInfo().equals("/adduser")) {
             //добавляем пользователя
             String addUser = "";
             String addPass = "";
-            if (request.getParameter("addUser")!=null) {
+            if (request.getParameter("addUser") != null) {
                 addUser = request.getParameter("addUser");
             }
             if (request.getParameter("addPass") != null) {
                 addPass = request.getParameter("addPass");
             }
-            if (addUser != null && !addUser.isEmpty() && addPass!= null) {
+            if (addUser != null && !addUser.isEmpty() && addPass != null) {
                 //addUser(addUser, addPass);
                 response.setContentType("application/json");
                 response.getWriter().write(addUser(addUser, addPass));
@@ -141,15 +142,29 @@ public class HelloWorld extends HttpServlet {
         } else if (request.getPathInfo().equals("/getuserdetails")) {
             //получаем имя пользователя и пароль
             int userId = 0;
-            if (request.getParameter("userid")!=null) {
+            if (request.getParameter("userid") != null) {
                 userId = Integer.parseInt(request.getParameter("userid"));
-                logger.debug("/getuserdetails?userid="+Integer.toString(userId));
+                logger.debug("/getuserdetails?userid=" + Integer.toString(userId));
             }
             if (userId != 0) {
                 response.setContentType("application/json");
                 response.getWriter().write(getUserDetails(userId));
             } else {
                 logger.error("!!! Error: have not received user id (userId=0");
+            }
+
+        } else if (request.getPathInfo().equals("/getbookdetails")) {
+            // получаем нформацию о книге
+            int bookId = 0;
+            if (request.getParameter("bookid") != null) {
+                bookId = Integer.parseInt(request.getParameter("bookid"));
+                logger.debug("/getbookdetails?bookid=" + Integer.toString(bookId));
+            }
+            if (bookId != 0) {
+                response.setContentType("application/json");
+                response.getWriter().write(getBookDetails(bookId));
+            } else {
+                logger.error("!!! Error: have not received book id (bookId=0");
             }
 
         } else if (request.getPathInfo().equals("/updateuserpass")) {
@@ -349,7 +364,6 @@ public class HelloWorld extends HttpServlet {
         try {
             con = getConnection();
             con.setAutoCommit(false);
-
             // проверяем количество ниг с добавляемым ISBN. выполняем запрос с параметром
             stmt = con.prepareStatement(selectSQL);
             stmt.setString(1, newISBN);
@@ -401,7 +415,7 @@ public class HelloWorld extends HttpServlet {
 
         try {
             con = getConnection();
-            con.setAutoCommit(false);
+            //con.setAutoCommit(false);
 
             stmt = con.createStatement();
             //выборка
@@ -414,11 +428,50 @@ public class HelloWorld extends HttpServlet {
             stmt.close();
         } catch (Exception e) {
                 logger.error("!!! Error getting user details", e);
-            } finally {
+        } finally {
                 closeQuiet(stmt);
                 closeQuiet(con);
-            }
+        }
         return res;
+    }
+
+    public String getBookDetails(int bookId) {
+        /**
+         *  возвращаем данные по пользователю: имя и пароль. Возвращаем: 0 - fail, 1 - success.
+         */
+        // для создания подключения к БД
+        Connection con = null;
+        // выполнение запроса
+        PreparedStatement stmt = null;
+        //возвращаем результат. по дефолту - неудача
+        String res = "{\"Result\":0}";
+        // строки запросов для preparedStatement
+        // для SELECT
+        String selectSQL = "SELECT ISBN AS isbn, author AS author, name AS name FROM books WHERE id = ?";
+
+        try {
+            con = getConnection();
+            // готовим запрос с параметром
+            stmt = con.prepareStatement(selectSQL);
+            stmt.setInt(1, bookId);
+            // выборка
+            ResultSet rs = stmt.executeQuery();
+            // одна запись из всей таблицы, т.к. id уникальный
+            rs.first();
+            //собираем ответ
+            res = "{\"ISBN\":\""+rs.getString("isbn")+"\", \"author\":\""+rs.getString("author")+"\", \"name\":\"" + rs.getString("name") + "\",\"Result\":1}";
+            logger.debug("JSON book details:"+res);
+            stmt.close();
+            //собираем ответ
+        } catch (Exception e) {
+            logger.error("!!! Error getting book details", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+
+        return res;
+
     }
 
     private String updateUserPass(int userId, String newPass) {

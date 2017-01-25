@@ -16,7 +16,7 @@
         <td><c:out value="${book.nameBook}"></c:out></td>
         <%-- колонка ISBN--%>
         <td>
-            <a href="#"><c:out value="${book.ISBNBook}"></c:out></a>
+            <a href="#" onclick="jsGetBookDetails(${book.idBook})"><c:out value="${book.ISBNBook}"></c:out></a>
         </td>
         <%-- колонка "Кем взята" --%>
         <c:choose>

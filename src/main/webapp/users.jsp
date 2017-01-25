@@ -70,7 +70,6 @@
                     $("#password").val(data.pass);
                         $("#dialog").dialog("option", {
                             title : "Пользователь "+data.user ,
-                            //buttons : { OK : function() {$(this).dialog("close");}}
                             buttons: {
                                 "Изменить пароль": function() {
                                     var UserPass = $("#password").val();

@@ -135,11 +135,55 @@
         }
     });
 
+    function jsGetBookDetails(bookid) {
+        //диалог с возможностью редактирования информации о книге
+        $.get("${pageContext.request.contextPath}/hw/getbookdetails?bookid="+bookid,
+            function(data) {
+                if (data.Result == 1) {
+                    $("#isbn").prop("disabled", true);
+                    $("#isbn").val(data.ISBN);
+                    $("#author").val(data.author);
+                    $("#name").val(data.name);
+                    $("#dialog").dialog("option", {
+                            title : "Книга \""+data.name +"\"" ,
+                            buttons: {
+                                "Сохранить": function() {
+                                    var newAuthor = $("#author").val();
+                                    var newName = $("#name").val();
+                                    if (newAuthor != "" && newName != "") {
+                                        $.get("${pageContext.request.contextPath}/hw/updatebookdetails?bookid="+bookid+"&newAuthor="+newAuthor+"&newName="+newName,
+                                            function(data) {
+                                                if (data.Result == 1) {
+                                                    alert("В данные книги внесены изменения!");
+                                                } else {
+                                                    alert("Ошибка при изменении данных книги!");
+                                                }
+                                            }, "json"
+                                        )
+                                            .done(function() {
+                                                $("#dialog").dialog("close");
+                                            })
+                                    } else {alert("Автор и название не должны быть пустыми!")}
+                                },
+                                "Отмена": function() {
+                                    $(this).dialog("close")
+                                }
+
+                            }
+                        }
+                    );
+                    $("#dialog").dialog("open");
+                }
+            }, "json"
+        )
+    }
+
     // вызов диалога добавления книги
     $( "#bookdialog" ).click(function() {
         $("#isbn").val("");
         $("#author").val("");
         $("#name").val("");
+        $("#isbn").prop("disabled", false);
         $("#dialog").dialog("option", {
                 //заголовок
                 title : "Добавить книгу",
