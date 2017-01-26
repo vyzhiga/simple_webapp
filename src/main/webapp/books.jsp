@@ -43,7 +43,7 @@
 <%@ include file="header.jsp"%>
 
 <div style="margin: 5px 0">
-<input type="button" id="bookdialog" value="Добавить книгу"/>
+    <input type="button" id="bookdialog" value="Добавить книгу"/>
 </div>
 
 <div id="dialog" title="Добавить книгу">

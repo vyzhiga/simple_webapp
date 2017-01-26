@@ -172,23 +172,45 @@ public class HelloWorld extends HttpServlet {
             int userId = 0;
             String newPass = "";
 
-            if (request.getParameter("userid")!=null) {
+            if (request.getParameter("userid") != null) {
                 userId = Integer.parseInt(request.getParameter("userid"));
             }
-            if (request.getParameter("newpass")!=null) {
-                newPass= request.getParameter("newpass");
+            if (request.getParameter("newpass") != null) {
+                newPass = request.getParameter("newpass");
             }
-            logger.debug("Changing password for userid="+userId+". New password is '"+newPass+"'.");
+            logger.debug("Changing password for userid=" + userId + ". New password is '" + newPass + "'.");
 
-            if (userId != 0 && newPass !="") {
+            if (userId != 0 && newPass != "") {
                 response.setContentType("application/json");
-                response.getWriter().write(updateUserPass(userId,newPass));
+                response.getWriter().write(updateUserPass(userId, newPass));
             } else {
                 logger.error("!!! Error: have not received user id (userId=0");
             }
 
+        } else if (request.getPathInfo().equals("/updatebookdetails")) {
+            // апдейтим детали (автор, название) книги
+            // задаем начальные значения переменных - параметров функции,
+            int bookId = 0;
+            String newAuthor = "";
+            String newName = "";
+
+            if (request.getParameter("bookid")!=null && request.getParameter("newAuthor")!=null && request.getParameter("newName")!=null) {
+                bookId = Integer.parseInt(request.getParameter("bookid"));
+                newAuthor = request.getParameter("newAuthor");
+                newName = request.getParameter("newName");
+                // првоеряем на непустые значения
+                if (bookId!=0 && !newAuthor.isEmpty() && !newName.isEmpty()) {
+                    response.setContentType("application/json");
+                    response.getWriter().write(updateBookDetails(bookId, newAuthor, newName));
+                } else {
+                    logger.error(" Error: received empty parameters for /updatebookdetails.");
+                }
+            } else {
+                logger.error("!!! Error: not enough parameters for /updatebookdetails.");
+            }
+
         } else if (request.getPathInfo().equals("/setuser")) {
-            //определяем переменную текущего пользователя
+            // определяем переменную текущего пользователя
             if (request.getParameter("username")!=null) {
                 session.setAttribute("sesCurUser", request.getParameter("username"));
                 logger.debug("Set curUser to '" + session.getAttribute("sesCurUser") + "'.");
@@ -505,6 +527,44 @@ public class HelloWorld extends HttpServlet {
         }
 
         return res;
+    }
+
+    public String updateBookDetails(int bookId, String newAuthor, String newName) {
+        /**
+         *  апдейтим детали книги. Возвращаем: 0 - fail, 1 - success.
+         */
+        // для создания подключения к БД
+        Connection con = null;
+        // выполнение запроса
+        PreparedStatement stmt = null;
+        //возвращаем результат. по дефолту - неудача
+        String res = "{\"Result\":0}";
+        // строки запросов для preparedStatement
+        // для SELECT
+        String updateSQL = "UPDATE books SET author = ?, name = ? WHERE id = ?";
+
+        try {
+            con = getConnection();
+            // готовим запрос с параметром
+            stmt = con.prepareStatement(updateSQL);
+            stmt.setString(1, newAuthor);
+            stmt.setString(2, newName);
+            stmt.setInt(3, bookId);
+            // выполняем запрос
+            stmt.executeUpdate();
+            res = "{\"Result\":1}";
+            logger.debug("Book id=" + bookId + " details have been successfully changed.");
+            stmt.close();
+            con.commit();
+        } catch (Exception e) {
+            logger.error("!!! Error updating book details", e);
+        } finally {
+            closeQuiet(stmt);
+            closeQuiet(con);
+        }
+
+        return res;
+
     }
 
     public void changeTaker(int bookId, int action, String username) {
