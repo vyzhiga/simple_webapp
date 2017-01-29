@@ -1,5 +1,6 @@
 package org.duzer.webapp;// Import required java libraries
 
+import org.h2.command.Prepared;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.transform.Result;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -47,10 +47,22 @@ public class HelloWorld extends HttpServlet {
 
         // создание объекта сессии, если еще не была создана
         HttpSession session = request.getSession(true);
-        // проверяем, есть ли параметр сессии, устанавливаем, если нет
+        // проверяем, есть ли параметр сессии - имя текущего пользователя, устанавливаем, если нет
         String param = (String) session.getAttribute("sesCurUser");
         if (param == null) {
             session.setAttribute("sesCurUser", "");
+        }
+
+        // проверяем и устанавливаем параметр сессии - столбец по которому сортируется вывод книг
+        param = (String) session.getAttribute("sesCurOrder");
+        if (param == null) {
+            session.setAttribute("sesCurOrder", "BookAuthor");
+        }
+
+        // проверяем и устанавливаем параметр сессии - порядок отображения столбца авторов или наименований
+        param = (String) session.getAttribute("sesOrder");
+        if (param == null) {
+            session.setAttribute("sesOrder", "ASC");
         }
 
         if (request.getPathInfo().equals("/initdb")) {
@@ -62,6 +74,8 @@ public class HelloWorld extends HttpServlet {
             //выводим список книг постранично
             int page = 1;
             int recPerPage = 5;
+            String Order = (String) session.getAttribute("sesOrder");
+            String CurOrder = (String) session.getAttribute("sesCurOrder");
             if (request.getParameter("page") != null) {
                 page = Integer.parseInt(request.getParameter("page"));
             }
@@ -69,7 +83,7 @@ public class HelloWorld extends HttpServlet {
                 recPerPage = Integer.parseInt(request.getParameter("recPerPage"));
             }
             // добавляем атрибут со списком пользователей
-            request.setAttribute("bookList", getBooks((page - 1) * recPerPage, recPerPage));
+            request.setAttribute("bookList", getBooks((page - 1) * recPerPage, recPerPage, CurOrder, Order));
             RequestDispatcher rd = getServletContext().getRequestDispatcher("/listBooks.jsp");
             rd.forward(request, response);
 
@@ -180,7 +194,8 @@ public class HelloWorld extends HttpServlet {
             }
             logger.debug("Changing password for userid=" + userId + ". New password is '" + newPass + "'.");
 
-            if (userId != 0 && newPass != "") {
+            //if (userId != 0 && newPass != "") {
+            if (userId != 0 && !newPass.equals("")) {
                 response.setContentType("application/json");
                 response.getWriter().write(updateUserPass(userId, newPass));
             } else {
@@ -238,6 +253,58 @@ public class HelloWorld extends HttpServlet {
                 }
             } else {
                 logger.error("!!! Error: undefined parameters in /changetaker");
+            }
+
+        } else if (request.getPathInfo().equals("/setauthororder")) {
+            if (((String) session.getAttribute("sesCurOrder")).equals("BookAuthor")) {
+                // устанавливаем параметр сессии, содержащий порядок отображения авторов книг
+                logger.debug("Sorting column is Author, sesOrder is '" + ((String) session.getAttribute("sesOrder")) + "'");
+                switch ((String) session.getAttribute("sesOrder")) {
+                    // был порядок возрасатющий - делаем убывающий
+                    case "ASC":
+                        session.setAttribute("sesOrder", "DESC");
+                        logger.debug("Set column=Author sesOrder to DESC.");
+                        break;
+                    // наоборот
+                    case "DESC":
+                        session.setAttribute("sesOrder", "ASC");
+                        logger.debug("Set column=Author sesOrder to ASC.");
+                        break;
+                    // заглушка, на всякий случай
+                    default:
+                        session.setAttribute("sesOrder", "ASC");
+                        logger.debug("Dummy has worked! Set column=Author sesAuthorOrder to ASC.");
+                        break;
+                }
+            } else {
+                session.setAttribute("sesCurOrder", "BookAuthor");
+                session.setAttribute("sesOrder", "ASC");
+            }
+
+        } else if (request.getPathInfo().equals("/setnameorder")) {
+            if (((String) session.getAttribute("sesCurOrder")).equals("BookName")) {
+                // устанавливаем параметр сессии, содержащий порядок отображения наименований книг
+                logger.debug("Sorting column is Name, sesOrder is '" + ((String) session.getAttribute("sesNameOrder")) + "'");
+                switch ((String) session.getAttribute("sesOrder")) {
+                    // был порядок возрасатющий - делаем убывающий
+                    case "ASC":
+                        session.setAttribute("sesOrder", "DESC");
+                        logger.debug("Set column=Name sesOrder to DESC.");
+                        break;
+                    // наоборот
+                    case "DESC":
+                        session.setAttribute("sesOrder", "ASC");
+                        logger.debug("Set column=Name sesOrder to ASC.");
+                        break;
+                    // заглушка, на всякий случай
+                    default:
+                        session.setAttribute("sesOrder", "ASC");
+                        logger.debug("Dummy has worked! Set column=Name sesOrder to ASC.");
+                        break;
+                }
+            } else {
+                session.setAttribute("sesCurOrder", "BookName");
+                session.setAttribute("sesOrder", "ASC");
             }
         }
     }
@@ -636,25 +703,47 @@ public class HelloWorld extends HttpServlet {
         return users;
     }
 
-    private List<LibrarianBook> getBooks(int offset, int recPerPage) {
+    private List<LibrarianBook> getBooks(int offset, int recPerPage, String CurOrder, String Order) {
         /**
          * читаем скриптом список нужного количества книг из таблицы books
          * с указанным смещением, сортируем, добавляем в список и возвращаем
          * список книг
          */
+
+        if (CurOrder.equals(null) || Order.equals("")) {
+            CurOrder = "BookAuthor";
+            logger.debug("Warning: empty CurOrder. Set it to BookAuthor.");
+        } else {
+            logger.debug("Non-empty CurOrder: " + CurOrder);
+        }
+
+        if (Order.equals(null) || Order.equals("")) {
+            Order = "ASC";
+            logger.debug("Warning: empty Order. Set it to ASC.");
+        } else {
+            logger.debug("Non-empty Order: " + Order);
+        }
+
         Connection con = null;
-        Statement stmt = null;
+        PreparedStatement stmt = null;
+        String selectSQL = "SELECT B.id AS BookID, B.ISBN AS BookISBN, B.author AS BookAuthor, B.name AS BookName, U.name AS UserName FROM books AS B LEFT JOIN users AS U ON B.takerid = U.id ORDER BY " + CurOrder +" "+ Order +", BookISBN LIMIT ? OFFSET ?";
 
         List<LibrarianBook> books = new ArrayList<>();
         try {
             con = getConnection();
-
             con.setAutoCommit(false);
-            stmt = con.createStatement();
 
-            ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.author AS BookAuthor, B.name AS BookName, U.name " +
+            stmt = con.prepareStatement(selectSQL);
+            stmt.setInt(1, recPerPage);
+            stmt.setInt(2, offset);
+
+            //stmt = con.createStatement();
+
+            /* ResultSet rs = stmt.executeQuery("SELECT B.id AS BookID, B.ISBN AS BookISBN, B.author AS BookAuthor, B.name AS BookName, U.name " +
                     "AS UserName FROM books AS B LEFT JOIN users AS U ON B.takerid = U.id ORDER BY BookISBN LIMIT " +
-                    Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset));
+                    Integer.toString(recPerPage) + " OFFSET " + Integer.toString(offset)); */
+
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 LibrarianBook book = new LibrarianBook();

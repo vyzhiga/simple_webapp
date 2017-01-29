@@ -35,6 +35,11 @@
             padding: 5px; /* Поля вокруг содержимого ячеек */
             border: 1px solid black; /* Граница вокруг ячеек */
         }
+
+        #authorth, #nameth {
+            cursor: pointer; /* меняем курсор */
+        }
+
     </style>
 </head>
 
@@ -52,12 +57,12 @@
     Название: <input type="text" id="name">
 </div>
 
-<table class="booksTbl">
-    <thead>
+<table class="booksTbl" id="bookstbl">
+    <thead id="bookshead">
     <tr>
         <th>ID</th>
-        <th>Author</th>
-        <th>NameBook</th>
+        <th id="authorth" onclick="jsSetAuthorOrder()">Author</th>
+        <th id="nameth" onclick="jsSetNameOrder()">NameBook</th>
         <th>ISBNBook</th>
         <th>Кем взята</th>
         <th>Удалить</th>
@@ -80,22 +85,94 @@
     var numPage = 1;
     // количество книг на странице
     var recPerPage = 5;
+    // текущая сортировка по колнке: автор или наименование книги
+    var jsCurOrder = "${sesCurOrder}";
+    // текущий порядок сортировки
+    var jsOrder = "${sesOrder}";
+
     $(document).ready(function () {
         recPerPage = $("#recqnt").val();
+
+        // устанавливаем цвета и символ направления сортировки при отображении страницы в зависимости от сортировки
+        if (jsCurOrder == "BookAuthor") {
+            $("#authorth").css("background", "#ff99ff");
+            if (jsOrder == "ASC") {
+                $("#authorth").text("Author ↑");
+            } else if (jsOrder == "DESC") {
+                $("#authorth").text("Author ↓");
+            }
+        } else if (jsCurOrder == "BookName") {
+            $("#nameth").css("background", "#ff99ff");
+            if (jsOrder == "ASC") {
+                $("#nameth").text("NameBook ↑");
+            } else if (jsOrder == "DESC") {
+                $("#nameth").text("NameBook ↓");
+            }
+        }
+
         //console.log("recpp", recPerPage);
         $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
         numPage = numPage + 1;
         // меняется количество книг
         $("#recqnt").click(function () {
             recPerPage = $("#recqnt").val();
-            //console.log("recpp", recPerPage);
         });
-        // обработка клика по кнопке "ПОказать еще"
+        // обработка клика по кнопке "Показать еще"
         $("#load").click(function () {
             $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
             numPage = numPage + 1;
         });
     });
+
+    function jsSetAuthorOrder() {
+        // меняем сортировку при клике по заголовку столбца с автором книги
+        numPage = 1;
+        $.get("${pageContext.request.contextPath}/hw/setauthororder")
+            .done(function() {
+                // очищаем таблицу. селектор id таблицы и все элементы tbody внутри этой таблицы
+                $("#bookstbl tbody").remove();
+                // меняем также цвет при клике по ячейке
+                $("#authorth").css("background", "#ff99ff");
+                $("#nameth").css("background", "#ccc");
+                // меняем символ стрелки сортировки
+                if ($("#authorth").text() =="Author ↑") {
+                    $("#authorth").text("Author ↓");
+                } else if ($("#authorth").text() =="Author ↓") {
+                    $("#authorth").text("Author ↑");
+                } else if ($("#authorth").text() =="Author") {
+                    $("#authorth").text("Author ↑");
+                    $("#nameth").text("NameBook");
+                }
+                // здесь вставляем <tbody></tbody> после заголовка таблицы с книгами. Селектор по id <thead>
+                $("<tbody></tbody>").insertAfter("#bookshead").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                }
+            )
+    }
+
+    function jsSetNameOrder() {
+        // меняем сортировку при клике по заголовку столбца с названием книги
+        numPage = 1;
+        $.get("${pageContext.request.contextPath}/hw/setnameorder")
+            .done(function() {
+                // очищаем таблицу. селектор id таблицы и все элементы tbody внутри этой таблицы
+                $("#bookstbl tbody").remove();
+                // меняем также цвет при клике по ячейке
+                $("#authorth").css("background", "#ccc");
+                $("#nameth").css("background", "#ff99ff");
+                // меняем символ стрелки сортировки
+                if ($("#nameth").text() =="NameBook ↑") {
+                    $("#nameth").text("NameBook ↓");
+                } else if ($("#nameth").text() =="NameBook ↓") {
+                    $("#nameth").text("NameBook ↑");
+                } else if ($("#nameth").text() =="NameBook") {
+                    $("#authorth").text("Author");
+                    $("#nameth").text("NameBook ↑");
+                }
+                // здесь вставляем <tbody></tbody> после заголовка таблицы с книгами. Селектор по id <thead>
+                $("<tbody></tbody>").insertAfter("#bookshead").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                }
+            )
+    }
 
     // удаляем книгу
     // bookid - id книги

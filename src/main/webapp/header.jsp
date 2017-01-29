@@ -10,5 +10,5 @@
 </table>
 
 <div style="margin: 10px 0">
-    Debug: Current user is ${empty sesCurUser? 'not set yet': sesCurUser}.
+    Debug: Current user is ${empty sesCurUser? 'not set yet': sesCurUser} | ${sesCurOrder} - ${sesOrder}.
 </div>
