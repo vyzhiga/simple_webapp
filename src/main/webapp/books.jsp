@@ -8,7 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page isELIgnored="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
+<!DOCTYPE html>
 <head>
     <title>Книги</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -18,29 +18,8 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <style type="text/css">
-        .booksTbl {
-            border: 4px double black; /* Рамка вокруг таблицы */
-            border-collapse: collapse; /* Отображать только одинарные линии */
-        }
-
-        .booksTbl th {
-            text-align: left; /* Выравнивание по левому краю */
-            background: #ccc; /* Цвет фона ячеек */
-            padding: 5px; /* Поля вокруг содержимого ячеек */
-            border: 1px solid black; /* Граница вокруг ячеек */
-        }
-
-        .booksTbl td {
-            padding: 5px; /* Поля вокруг содержимого ячеек */
-            border: 1px solid black; /* Граница вокруг ячеек */
-        }
-
-        #authorth, #nameth {
-            cursor: pointer; /* меняем курсор */
-        }
-
-    </style>
+    <%-- определяем внешний стиль --%>
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/hw.css">
 </head>
 
 <body>
@@ -57,8 +36,8 @@
     Название: <input type="text" id="name">
 </div>
 
-<table class="booksTbl" id="bookstbl">
-    <thead id="bookshead">
+<table class="booksTbl">
+    <thead>
     <tr>
         <th>ID</th>
         <th id="authorth" onclick="jsSetAuthorOrder()">Author</th>
