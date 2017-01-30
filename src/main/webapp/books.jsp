@@ -68,7 +68,7 @@
         <th>Удалить</th>
     </tr>
     </thead>
-    <tbody style="display: none;"></tbody>
+    <tbody id="emptytbody" style="display: none;"></tbody>
 </table>
 
 <%-- Кнопка "Показать еще" в конце списка--%>
@@ -130,7 +130,7 @@
         $.get("${pageContext.request.contextPath}/hw/setauthororder")
             .done(function() {
                 // очищаем таблицу. селектор id таблицы и все элементы tbody внутри этой таблицы
-                $("#bookstbl tbody").remove();
+                $("#emptytbody ~ tbody").remove();
                 // меняем также цвет при клике по ячейке
                 $("#authorth").css("background", "#ff99ff");
                 $("#nameth").css("background", "#ccc");
@@ -144,7 +144,9 @@
                     $("#nameth").text("NameBook");
                 }
                 // здесь вставляем <tbody></tbody> после заголовка таблицы с книгами. Селектор по id <thead>
-                $("<tbody></tbody>").insertAfter("#bookshead").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                // увеличиваем счетчик отображенных страниц
+                numPage = numPage + 1;
                 }
             )
     }
@@ -155,7 +157,7 @@
         $.get("${pageContext.request.contextPath}/hw/setnameorder")
             .done(function() {
                 // очищаем таблицу. селектор id таблицы и все элементы tbody внутри этой таблицы
-                $("#bookstbl tbody").remove();
+                $("#emptytbody ~ tbody").remove();
                 // меняем также цвет при клике по ячейке
                 $("#authorth").css("background", "#ccc");
                 $("#nameth").css("background", "#ff99ff");
@@ -169,7 +171,9 @@
                     $("#nameth").text("NameBook ↑");
                 }
                 // здесь вставляем <tbody></tbody> после заголовка таблицы с книгами. Селектор по id <thead>
-                $("<tbody></tbody>").insertAfter("#bookshead").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                $("<tbody></tbody>").insertAfter("tbody:last").load(getBooksUrl + '?page=' + numPage + '&recPerPage=' + recPerPage);
+                // увеличиваем счетчик отображенных страниц
+                numPage = numPage + 1;
                 }
             )
     }
