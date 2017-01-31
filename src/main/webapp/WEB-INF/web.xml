@@ -17,4 +17,14 @@
 		<url-pattern>/hw/*</url-pattern>
 	</servlet-mapping>
 
+	<filter>
+        <filter-name>HWFilter</filter-name>
+        <filter-class>org.duzer.webapp.HWFilter</filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>HWFilter</filter-name>
+        <url-pattern>/hw/*</url-pattern>
+    </filter-mapping>
+
 </web-app>

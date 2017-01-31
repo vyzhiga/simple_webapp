@@ -1,9 +1,8 @@
-package org.duzer.webapp;// Import required java libraries
+package org.duzer.webapp;
 
-import org.h2.command.Prepared;
+// Import required java libraries
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -57,6 +56,9 @@ public class HelloWorld extends HttpServlet {
         param = (String) session.getAttribute("sesCurOrder");
         if (param == null) {
             session.setAttribute("sesCurOrder", "BookAuthor");
+            logger.debug("HelloWorld class: session param sesCurOrder is null");
+        } else {
+            logger.debug("HelloWorld class: session param sesCurOrder is not null: "+((String) session.getAttribute("sesCurOrder")));
         }
 
         // проверяем и устанавливаем параметр сессии - порядок отображения столбца авторов или наименований
